@@ -1,0 +1,61 @@
+<odoo>
+    <record id="view_partner_form_inherit_call_ai_v2" model="ir.ui.view">
+        <field name="name">res.partner.call.ai</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="B2B Akquise">
+
+                    <!-- 🔹 Lead / Status -->
+                    <group>
+                        <field name="is_lead"/>
+                        <field name="call_status"/>
+                        <field name="next_call_date"/>
+                    </group>
+
+                    <!-- 🔹 Call Zeiten -->
+                    <group>
+                        <field name="call_start"/>
+                        <field name="call_end"/>
+                        <field name="call_duration"/>
+                    </group>
+
+                    <!-- 🔥 WICHTIG: Neue Ebene -->
+                    <div style="margin-top: 10px;">
+
+                        <div class="o_row">
+
+                            <button name="action_start_call"
+                                    type="object"
+                                    string="Telefonat starten"
+                                    class="oe_highlight"
+                                    style="width: 50%;"/>
+
+                            <button name="action_end_call"
+                                    type="object"
+                                    string="Telefonat beenden"
+                                    style="width: 50%;"/>
+
+                        </div>
+
+                    </div>
+
+                    <!-- 🔹 Call History -->
+                    <group string="Call History">
+                        <field name="call_history_ids">
+                            <tree default_order="call_start desc">
+                                <field name="call_start"/>
+                                <field name="call_end"/>
+                                <field name="duration"/>
+                            </tree>
+                        </field>
+                    </group>
+
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

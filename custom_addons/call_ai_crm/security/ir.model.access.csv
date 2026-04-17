@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_call_history,access_call_history,model_call_history,base.group_user,1,1,1,1
