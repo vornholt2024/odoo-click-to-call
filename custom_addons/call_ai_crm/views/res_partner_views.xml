@@ -1,51 +1,130 @@
 <odoo>
     <record id="view_partner_form_inherit_call_ai_v2" model="ir.ui.view">
-        <field name="name">res.partner.call.ai</field>
+        <field name="name">res.partner.call.ai.final</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority" eval="1000"/>
         <field name="arch" type="xml">
 
             <xpath expr="//notebook" position="inside">
-                <page string="B2B Akquise">
 
-                    <!-- 🔹 Lead / Status -->
-                    <group>
-                        <field name="is_lead"/>
+                <page string="📞 B2B Akquise">
+
+                    <!-- 🔥 REQUIRED FIELDS for Attribute invisible-->
+                    <group invisible="1">
+                        <field name="objection_no_need"/>
+                        <field name="objection_internal"/>
+                        <field name="objection_no_interest"/>
+                        <field name="objection_other"/>
                         <field name="call_status"/>
-                        <field name="next_call_date"/>
                     </group>
 
-                    <!-- 🔹 Call Zeiten -->
-                    <group>
-                        <field name="call_start"/>
-                        <field name="call_end"/>
-                        <field name="call_duration"/>
-                    </group>
+                    <!-- 🔥 EINWÄNDE -->
+                    <div style="display:flex; gap:12px; margin-bottom:24px;">
 
-                    <!-- 🔥 WICHTIG: Neue Ebene -->
-                    <div style="margin-top: 10px;">
+                        <button name="objection_1" type="object"
+                                string="Kein Bedarf"
+                                class="btn btn-outline-secondary"
+                                invisible="objection_no_need"/>
 
-                        <div class="o_row">
+                        <button name="objection_1" type="object"
+                                string="Kein Bedarf"
+                                class="btn btn-danger"
+                                invisible="not objection_no_need"/>
 
-                            <button name="action_start_call"
-                                    type="object"
-                                    string="Telefonat starten"
-                                    class="oe_highlight"
-                                    style="width: 50%;"/>
+                        <button name="objection_2" type="object"
+                                string="Internes Programm"
+                                class="btn btn-outline-secondary"
+                                invisible="objection_internal"/>
 
-                            <button name="action_end_call"
-                                    type="object"
-                                    string="Telefonat beenden"
-                                    style="width: 50%;"/>
+                        <button name="objection_2" type="object"
+                                string="Internes Programm"
+                                class="btn btn-danger"
+                                invisible="not objection_internal"/>
 
-                        </div>
+                        <button name="objection_3" type="object"
+                                string="Kein Interesse"
+                                class="btn btn-outline-secondary"
+                                invisible="objection_no_interest"/>
+
+                        <button name="objection_3" type="object"
+                                string="Kein Interesse"
+                                class="btn btn-danger"
+                                invisible="not objection_no_interest"/>
+
+                        <button name="objection_4" type="object"
+                                string="Andere Partner"
+                                class="btn btn-outline-secondary"
+                                invisible="objection_other"/>
+
+                        <button name="objection_4" type="object"
+                                string="Andere Partner"
+                                class="btn btn-danger"
+                                invisible="not objection_other"/>
 
                     </div>
 
-                    <!-- 🔹 Call History -->
+                    <!-- 🔥 TELEFON -->
+                    <div style="display:flex; gap:12px; margin-bottom:24px;">
+
+                        <button name="action_start_call"
+                                type="object"
+                                string="📞 Start"
+                                class="btn btn-success"
+                                invisible="call_status == 'in_call'"/>
+
+                        <button name="action_start_call"
+                                type="object"
+                                string="📞 Start"
+                                class="btn btn-outline-secondary"
+                                invisible="call_status != 'in_call'"/>
+
+                        <button name="action_end_call"
+                                type="object"
+                                string="⏹️ Ende"
+                                class="btn btn-danger"
+                                invisible="call_status != 'in_call'"/>
+
+                        <button name="action_end_call"
+                                type="object"
+                                string="⏹️ Ende"
+                                class="btn btn-outline-secondary"
+                                invisible="call_status == 'in_call'"/>
+
+                    </div>
+
+                    <!-- 🔥 DATEN -->
+                    <group col="2">
+
+                        <group string="Lead">
+                            <field name="is_lead"/>
+                            <field name="lead_status"/>
+                            <field name="next_call_date"/>
+                        </group>
+
+                        <group string="Anruf">
+
+                            <!-- STATUS MIT FARBE -->
+                            <field name="call_status" widget="badge"
+                                   decoration-success="call_status == 'idle'"
+                                   decoration-danger="call_status == 'in_call'"/>
+
+                            <field name="call_start"/>
+                            <field name="call_end"/>
+                            <field name="call_duration"/>
+
+                            <!-- 🔥 KPIs -->
+                            <field name="call_count" readonly="1"/>
+                            <field name="call_total_duration" readonly="1"/>
+
+                        </group>
+
+                    </group>
+
+                    <!-- 🔥 HISTORY -->
                     <group string="Call History">
                         <field name="call_history_ids">
-                            <tree default_order="call_start desc">
+                            <tree>
                                 <field name="call_start"/>
                                 <field name="call_end"/>
                                 <field name="duration"/>
@@ -54,6 +133,7 @@
                     </group>
 
                 </page>
+
             </xpath>
 
         </field>
