@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+
     <record id="view_partner_form_inherit_call_ai_v2" model="ir.ui.view">
         <field name="name">res.partner.call.ai.final</field>
         <field name="model">res.partner</field>
@@ -10,7 +12,7 @@
 
                 <page string="📞 B2B Akquise">
 
-                    <!-- 🔥 REQUIRED FIELDS for Attribute invisible-->
+                    <!-- Benötigte Felder für invisible -->
                     <group invisible="1">
                         <field name="objection_no_need"/>
                         <field name="objection_internal"/>
@@ -19,52 +21,60 @@
                         <field name="call_status"/>
                     </group>
 
-                    <!-- 🔥 EINWÄNDE -->
+                    <!-- Einwände -->
                     <div style="display:flex; gap:12px; margin-bottom:24px;">
 
-                        <button name="objection_1" type="object"
+                        <button name="action_toggle_no_need"
+                                type="object"
                                 string="Kein Bedarf"
                                 class="btn btn-outline-secondary"
                                 invisible="objection_no_need"/>
 
-                        <button name="objection_1" type="object"
+                        <button name="action_toggle_no_need"
+                                type="object"
                                 string="Kein Bedarf"
                                 class="btn btn-danger"
                                 invisible="not objection_no_need"/>
 
-                        <button name="objection_2" type="object"
+                        <button name="action_toggle_internal"
+                                type="object"
                                 string="Internes Programm"
                                 class="btn btn-outline-secondary"
                                 invisible="objection_internal"/>
 
-                        <button name="objection_2" type="object"
+                        <button name="action_toggle_internal"
+                                type="object"
                                 string="Internes Programm"
                                 class="btn btn-danger"
                                 invisible="not objection_internal"/>
 
-                        <button name="objection_3" type="object"
+                        <button name="action_toggle_no_interest"
+                                type="object"
                                 string="Kein Interesse"
                                 class="btn btn-outline-secondary"
                                 invisible="objection_no_interest"/>
 
-                        <button name="objection_3" type="object"
+                        <button name="action_toggle_no_interest"
+                                type="object"
                                 string="Kein Interesse"
                                 class="btn btn-danger"
                                 invisible="not objection_no_interest"/>
 
-                        <button name="objection_4" type="object"
+                        <button name="action_toggle_other"
+                                type="object"
                                 string="Andere Partner"
                                 class="btn btn-outline-secondary"
                                 invisible="objection_other"/>
 
-                        <button name="objection_4" type="object"
+                        <button name="action_toggle_other"
+                                type="object"
                                 string="Andere Partner"
                                 class="btn btn-danger"
                                 invisible="not objection_other"/>
 
                     </div>
 
-                    <!-- 🔥 TELEFON -->
+                    <!-- Telefon -->
                     <div style="display:flex; gap:12px; margin-bottom:24px;">
 
                         <button name="action_start_call"
@@ -93,7 +103,7 @@
 
                     </div>
 
-                    <!-- 🔥 DATEN -->
+                    <!-- Daten -->
                     <group col="2">
 
                         <group string="Lead">
@@ -104,8 +114,8 @@
 
                         <group string="Anruf">
 
-                            <!-- STATUS MIT FARBE -->
-                            <field name="call_status" widget="badge"
+                            <field name="call_status"
+                                   widget="badge"
                                    decoration-success="call_status == 'idle'"
                                    decoration-danger="call_status == 'in_call'"/>
 
@@ -113,7 +123,6 @@
                             <field name="call_end"/>
                             <field name="call_duration"/>
 
-                            <!-- 🔥 KPIs -->
                             <field name="call_count" readonly="1"/>
                             <field name="call_total_duration" readonly="1"/>
 
@@ -121,7 +130,7 @@
 
                     </group>
 
-                    <!-- 🔥 HISTORY -->
+                    <!-- Call History -->
                     <group string="Call History">
                         <field name="call_history_ids">
                             <tree>
@@ -138,4 +147,5 @@
 
         </field>
     </record>
+
 </odoo>

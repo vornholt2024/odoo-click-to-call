@@ -6,12 +6,8 @@ class CallHistory(models.Model):
     _description = 'Call History'
     _order = 'call_start desc, id desc'
 
-    partner_id = fields.Many2one(
-        'res.partner',
-        string="Kontakt",
-        ondelete='cascade'
-    )
-
-    call_start = fields.Datetime(string="Start")
-    call_end = fields.Datetime(string="Ende")
-    duration = fields.Float(string="Dauer (Minuten)")
+    partner_id = fields.Many2one('res.partner', string="Kontakt", required=True)
+    call_start = fields.Datetime("Start")
+    call_end = fields.Datetime("Ende")
+    duration = fields.Float("Dauer (Minuten)")
+    

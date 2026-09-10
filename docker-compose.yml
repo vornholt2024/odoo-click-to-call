@@ -16,6 +16,7 @@ services:
       - "8069:8069"
     volumes:
       - ./custom_addons:/mnt/extra-addons
+      - odoo_data:/var/lib/odoo
     command: >
       odoo
       --db_host=db
@@ -24,3 +25,4 @@ services:
 
 volumes:
   db_data:
+  odoo_data:
