@@ -1,10 +1,11 @@
 services:
+
   db:
     image: postgres:15
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
 
@@ -18,10 +19,7 @@ services:
       - ./custom_addons:/mnt/extra-addons
       - odoo_data:/var/lib/odoo
     command: >
-      odoo
-      --db_host=db
-      --db_user=odoo
-      --db_password=odoo
+      odoo --db_host=db --db_user=${POSTGRES_USER} --db_password=${POSTGRES_PASSWORD}
 
 volumes:
   db_data:

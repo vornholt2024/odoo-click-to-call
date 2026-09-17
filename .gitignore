@@ -1,0 +1,22 @@
+# Umgebungsvariablen und Zugangsdaten
+.env
+.env.*
+
+# Beispielkonfiguration darf versioniert werden
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Betriebssystem / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Laufzeit- und Sicherungsdateien
+*.log
+*.bak
+*.backup
+*.dump
+*.sql
