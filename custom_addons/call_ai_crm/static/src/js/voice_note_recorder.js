@@ -2,6 +2,7 @@
 
 import { Component, onWillUnmount, onWillUpdateProps, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { deserializeDateTime } from "@web/core/l10n/dates";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 /**
@@ -11,9 +12,10 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
  * Odoo-Backend übertragen. Erst das Backend kommuniziert mit OpenAI,
  * damit der API-Schlüssel niemals an den Browser ausgeliefert wird.
  *
- * Nach der Transkription wird der erkannte Text in einem zweiten,
- * getrennten Schritt analysiert. Die Analyse ist zunächst nur ein
- * Vorschlag und verändert noch keine CRM-Felder.
+ * Nach der Transkription wird der erkannte Text analysiert. Die daraus
+ * entstehenden Werte werden nur als Entwurf in die vorhandenen Felder
+ * der Nachbearbeitung übernommen. Der Mitarbeiter kann sie anschließend
+ * prüfen und ändern, bevor er sie mit "Speichern" bestätigt.
  */
 export class VoiceNoteRecorder extends Component {
     static template = "call_ai_crm.VoiceNoteRecorder";
@@ -206,9 +208,37 @@ export class VoiceNoteRecorder extends Component {
             }
 
             this.state.analysis = result.analysis;
+            await this.applyAnalysisSuggestion(result.analysis);
         } finally {
             this.state.analyzing = false;
         }
+    }
+
+    async applyAnalysisSuggestion(analysis) {
+        /*
+         * Die KI-Werte werden nur in die Entwurfsfelder übernommen.
+         * Erst der vorhandene Speichern-Button bestätigt die Daten fachlich.
+         */
+        const objections = new Set(analysis.objections || []);
+
+        const changes = {
+            draft_result: analysis.lead_status || false,
+            draft_note: analysis.note || false,
+            objection_no_need: objections.has("Kein Bedarf"),
+            objection_internal: objections.has("Internes Programm"),
+            objection_other_partner: objections.has("Andere Partner"),
+            objection_price: objections.has("Kosten / Preis"),
+        };
+
+        if (analysis.followup_requested && analysis.followup_datetime) {
+            changes.draft_followup = deserializeDateTime(
+                analysis.followup_datetime
+            );
+        } else {
+            changes.draft_followup = false;
+        }
+
+        await this.props.record.update(changes);
     }
 
     getAudioFilename(mimeType) {
