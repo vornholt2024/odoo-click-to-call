@@ -5,11 +5,11 @@ import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 /**
- * Kleine Voice-Note-Aufnahme für die Nachbearbeitung eines Telefonats.
+ * Voice-Note-Aufnahme für die Nachbearbeitung eines Telefonats.
  *
- * Die Aufnahme bleibt in diesem ersten Entwicklungsschritt vollständig
- * im Browser. Damit kann die Mikrofonaufnahme unabhängig von Whisper
- * und der späteren KI-Anbindung getestet werden.
+ * Die Aufnahme entsteht im Browser und wird nach dem Stoppen an das
+ * Odoo-Backend übertragen. Erst das Backend kommuniziert mit OpenAI,
+ * damit der API-Schlüssel niemals an den Browser ausgeliefert wird.
  */
 export class VoiceNoteRecorder extends Component {
     static template = "call_ai_crm.VoiceNoteRecorder";
@@ -18,7 +18,8 @@ export class VoiceNoteRecorder extends Component {
     setup() {
         this.state = useState({
             recording: false,
-            audioUrl: null,
+            transcribing: false,
+            transcript: null,
             error: null,
         });
 
@@ -28,10 +29,6 @@ export class VoiceNoteRecorder extends Component {
 
         onWillUnmount(() => {
             this.stopMediaStream();
-
-            if (this.state.audioUrl) {
-                URL.revokeObjectURL(this.state.audioUrl);
-            }
         });
     }
 
@@ -43,11 +40,12 @@ export class VoiceNoteRecorder extends Component {
     }
 
     async startRecording() {
-        if (!this.canRecord || this.state.recording) {
+        if (!this.canRecord || this.state.recording || this.state.transcribing) {
             return;
         }
 
         this.state.error = null;
+        this.state.transcript = null;
 
         try {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -63,7 +61,7 @@ export class VoiceNoteRecorder extends Component {
                 }
             });
 
-            this.mediaRecorder.addEventListener("stop", () => {
+            this.mediaRecorder.addEventListener("stop", async () => {
                 const mimeType =
                     this.mediaRecorder.mimeType || "audio/webm";
 
@@ -71,12 +69,15 @@ export class VoiceNoteRecorder extends Component {
                     type: mimeType,
                 });
 
-                if (this.state.audioUrl) {
-                    URL.revokeObjectURL(this.state.audioUrl);
+                this.stopMediaStream();
+
+                if (!audioBlob.size) {
+                    this.state.error =
+                        "Die Voice-Note enthält keine Audiodaten.";
+                    return;
                 }
 
-                this.state.audioUrl = URL.createObjectURL(audioBlob);
-                this.stopMediaStream();
+                await this.transcribeRecording(audioBlob);
             });
 
             this.mediaRecorder.start();
@@ -95,6 +96,63 @@ export class VoiceNoteRecorder extends Component {
 
         this.mediaRecorder.stop();
         this.state.recording = false;
+    }
+
+    async transcribeRecording(audioBlob) {
+        this.state.transcribing = true;
+        this.state.error = null;
+
+        try {
+            const formData = new FormData();
+            formData.append(
+                "audio",
+                audioBlob,
+                this.getAudioFilename(audioBlob.type)
+            );
+            formData.append("csrf_token", odoo.csrf_token);
+
+            const response = await fetch("/call_ai_crm/transcribe", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin",
+            });
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                throw new Error(
+                    "Der Server hat keine gültige Antwort geliefert."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result.error ||
+                    "Die Voice-Note konnte nicht transkribiert werden."
+                );
+            }
+
+            this.state.transcript = result.text;
+        } catch (error) {
+            this.state.error =
+                error.message ||
+                "Die Voice-Note konnte nicht transkribiert werden.";
+        } finally {
+            this.state.transcribing = false;
+        }
+    }
+
+    getAudioFilename(mimeType) {
+        if (mimeType.includes("ogg")) {
+            return "voice-note.ogg";
+        }
+
+        if (mimeType.includes("mp4")) {
+            return "voice-note.m4a";
+        }
+
+        return "voice-note.webm";
     }
 
     stopMediaStream() {
