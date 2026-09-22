@@ -244,13 +244,13 @@
                                                 type="object"
                                                 string="📞 Start"
                                                 class="btn btn-success"
-                                                invisible="call_status != 'idle' or lock_owned_by_other_user"/>
+                                                invisible="not is_lead or call_status != 'idle' or lock_owned_by_other_user"/>
 
                                         <button name="action_start_call"
                                                 type="object"
                                                 string="📞 Start"
                                                 class="btn btn-outline-secondary"
-                                                invisible="call_status == 'idle' and not lock_owned_by_other_user"
+                                                invisible="is_lead and call_status == 'idle' and not lock_owned_by_other_user"
                                                 disabled="1"/>
 
 
@@ -349,64 +349,91 @@
                                                 margin-top:8px;
                                                 flex-wrap:nowrap;">
 
+                                        <!--
+                                            Für jeden Einwand gibt es drei Darstellungen:
+                                            deaktiviert außerhalb der Nachbearbeitung,
+                                            auswählbar während der Nachbearbeitung und
+                                            rot markiert, wenn der Einwand gewählt wurde.
+                                        -->
+
                                         <button name="action_toggle_no_need"
                                                 type="object"
                                                 string="Kein Bedarf"
                                                 class="btn btn-outline-secondary"
-                                                invisible="objection_no_need"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or objection_no_need"/>
 
                                         <button name="action_toggle_no_need"
                                                 type="object"
                                                 string="Kein Bedarf"
                                                 class="btn btn-danger"
-                                                invisible="not objection_no_need"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or not objection_no_need"/>
+
+                                        <button name="action_toggle_no_need"
+                                                type="object"
+                                                string="Kein Bedarf"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'post_processing' and lock_owned_by_current_user"
+                                                disabled="1"/>
 
 
                                         <button name="action_toggle_internal"
                                                 type="object"
                                                 string="Internes Programm"
                                                 class="btn btn-outline-secondary"
-                                                invisible="objection_internal"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or objection_internal"/>
 
                                         <button name="action_toggle_internal"
                                                 type="object"
                                                 string="Internes Programm"
                                                 class="btn btn-danger"
-                                                invisible="not objection_internal"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or not objection_internal"/>
+
+                                        <button name="action_toggle_internal"
+                                                type="object"
+                                                string="Internes Programm"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'post_processing' and lock_owned_by_current_user"
+                                                disabled="1"/>
 
 
                                         <button name="action_toggle_other_partner"
                                                 type="object"
                                                 string="Andere Partner"
                                                 class="btn btn-outline-secondary"
-                                                invisible="objection_other_partner"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or objection_other_partner"/>
 
                                         <button name="action_toggle_other_partner"
                                                 type="object"
                                                 string="Andere Partner"
                                                 class="btn btn-danger"
-                                                invisible="not objection_other_partner"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or not objection_other_partner"/>
+
+                                        <button name="action_toggle_other_partner"
+                                                type="object"
+                                                string="Andere Partner"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'post_processing' and lock_owned_by_current_user"
+                                                disabled="1"/>
 
 
                                         <button name="action_toggle_price"
                                                 type="object"
                                                 string="Kosten / Preis"
                                                 class="btn btn-outline-secondary"
-                                                invisible="objection_price"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or objection_price"/>
 
                                         <button name="action_toggle_price"
                                                 type="object"
                                                 string="Kosten / Preis"
                                                 class="btn btn-danger"
-                                                invisible="not objection_price"
-                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user or not objection_price"/>
+
+                                        <button name="action_toggle_price"
+                                                type="object"
+                                                string="Kosten / Preis"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'post_processing' and lock_owned_by_current_user"
+                                                disabled="1"/>
 
                                     </div>
                                 </div>

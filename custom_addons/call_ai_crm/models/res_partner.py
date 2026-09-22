@@ -447,6 +447,14 @@ class ResPartner(models.Model):
         """Startet die Erfassung eines neuen Telefonats."""
         self.ensure_one()
 
+        # Ein neues Akquisegespräch darf nur gestartet werden,
+        # wenn der Kontakt ausdrücklich für die B2B-Akquise aktiviert ist.
+        # Vorhandene Historien und Kontaktdaten bleiben davon unberührt.
+        if not self.is_lead:
+            raise UserError(
+                "Die B2B-Akquise ist für diesen Kontakt nicht aktiviert."
+            )
+
         if self.call_status != 'idle':
             raise UserError(
                 "Das aktuelle Gespräch muss zuerst abgeschlossen werden."
@@ -612,7 +620,11 @@ class ResPartner(models.Model):
         if self.draft_result:
             self.lead_status = self.draft_result
 
-        self.next_call_date = self.draft_followup or False
+        # Eine bereits bestehende Wiedervorlage wird nicht gelöscht,
+        # nur weil beim aktuellen Gespräch kein neuer Termin eingetragen wurde.
+        # Ein neuer Termin ersetzt die bisherige Wiedervorlage.
+        if self.draft_followup:
+            self.next_call_date = self.draft_followup
 
         self._finish_call_processing()
 
