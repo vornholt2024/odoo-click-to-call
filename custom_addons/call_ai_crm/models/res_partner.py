@@ -482,9 +482,21 @@ class ResPartner(models.Model):
             'call_status': 'in_call',
         })
 
-        # Die aufbereitete Nummer wird später für den Aufruf
-        # von MicroSIP verwendet.
-        return True
+        # MicroSIP läuft auf dem Windows-Arbeitsplatz und wird deshalb
+        # nicht aus dem Python-Backend gestartet. Die Client-Action wird
+        # im Browser ausgeführt und übergibt die SIP-Adresse an Windows.
+        sip_number = number
+
+        if sip_number.startswith("0049"):
+            sip_number = "+49" + sip_number[4:]
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'call_ai_crm_microsip',
+            'params': {
+                'sip_uri': f"sip:{sip_number}",
+            },
+        }
 
     # ---------------------------------------------------------
     # TELEFONAT BEENDEN
