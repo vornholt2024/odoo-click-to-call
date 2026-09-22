@@ -291,19 +291,13 @@
 
 
                                     <!--
-                                        Platzhalter für die spätere Voice-Note-Funktion.
-                                        Bewusst kein Odoo-Button, solange noch keine Methode existiert.
+                                        Die Voice-Note wird ausschließlich im Browser
+                                        aufgenommen. In diesem ersten Schritt bleibt die
+                                        Audiodatei lokal und kann direkt probegehört werden.
                                     -->
-                                    <span style="display:inline-block;
-                                                padding:6px 10px;
-                                                border:1px solid #adb5bd;
-                                                border-radius:4px;
-                                                color:#6c757d;
-                                                background:#f8f9fa;
-                                                white-space:nowrap;
-                                                flex-shrink:0;">
-                                        🎙 Voice-Note aufnehmen
-                                    </span>
+                                    <field name="voice_note_control"
+                                           widget="voice_note_recorder"
+                                           nolabel="1"/>
 
 
                                     <!--
