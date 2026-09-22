@@ -1,7 +1,10 @@
 import json
 import logging
 import os
+import re
+from datetime import datetime, time, timedelta
 
+import pytz
 import requests
 
 from odoo import http
@@ -12,6 +15,16 @@ _logger = logging.getLogger(__name__)
 
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 OPENAI_ANALYSIS_MODEL = "gpt-5.6-terra"
+
+WEEKDAYS = {
+    "montag": 0,
+    "dienstag": 1,
+    "mittwoch": 2,
+    "donnerstag": 3,
+    "freitag": 4,
+    "samstag": 5,
+    "sonntag": 6,
+}
 
 ANALYSIS_SCHEMA = {
     "type": "object",
@@ -163,7 +176,89 @@ class CallAiCrmAnalysisController(http.Controller):
                 status=502,
             )
 
+        if analysis.get("followup_requested"):
+            followup_datetime = self._parse_followup_expression(
+                analysis.get("followup_expression", "")
+            )
+            analysis["followup_datetime"] = followup_datetime
+        else:
+            analysis["followup_datetime"] = None
+
         return self._json_response({"analysis": analysis})
+
+    @staticmethod
+    def _parse_followup_expression(expression):
+        """Berechnet aus einfachen deutschen Zeitangaben einen festen Termin."""
+
+        text_value = (expression or "").strip().lower()
+        if not text_value:
+            return None
+
+        # Die Berechnung erfolgt in der Zeitzone des angemeldeten Benutzers.
+        # Dadurch bleibt 10:00 Uhr auch tatsächlich 10:00 Uhr Ortszeit.
+        timezone_name = request.env.user.tz or "Europe/Berlin"
+        try:
+            user_timezone = pytz.timezone(timezone_name)
+        except pytz.UnknownTimeZoneError:
+            user_timezone = pytz.timezone("Europe/Berlin")
+
+        now_local = datetime.now(user_timezone)
+        target_date = None
+
+        if "übermorgen" in text_value:
+            target_date = now_local.date() + timedelta(days=2)
+        elif "morgen" in text_value:
+            target_date = now_local.date() + timedelta(days=1)
+        elif "heute" in text_value:
+            target_date = now_local.date()
+        else:
+            for weekday_name, weekday_number in WEEKDAYS.items():
+                if weekday_name not in text_value:
+                    continue
+
+                days_ahead = (weekday_number - now_local.weekday()) % 7
+
+                # Ein genannter Wochentag bezeichnet die nächste zukünftige
+                # Ausführung. Am gleichen Wochentag wird daher eine Woche
+                # weitergerechnet.
+                if days_ahead == 0:
+                    days_ahead = 7
+
+                target_date = now_local.date() + timedelta(days=days_ahead)
+                break
+
+        if target_date is None:
+            return None
+
+        # Ohne konkrete Uhrzeit wird als feste Geschäftsregel 10:00 Uhr
+        # verwendet. Das ist eine übliche Bürozeit und bleibt editierbar.
+        target_hour = 10
+        target_minute = 0
+
+        time_match = re.search(
+            r"(?<!\d)([01]?\d|2[0-3])(?:\s*[:.]\s*([0-5]\d))?\s*(?:uhr)?",
+            text_value,
+        )
+        if time_match:
+            target_hour = int(time_match.group(1))
+            target_minute = int(time_match.group(2) or 0)
+        elif "vormittag" in text_value:
+            target_hour = 10
+        elif "mittag" in text_value:
+            target_hour = 12
+        elif "nachmittag" in text_value:
+            target_hour = 15
+
+        local_datetime = user_timezone.localize(
+            datetime.combine(
+                target_date,
+                time(hour=target_hour, minute=target_minute),
+            )
+        )
+
+        # Für die Browserseite geben wir ISO 8601 mit Zeitzoneninformation
+        # zurück. So kann der Wert später eindeutig in Odoo übernommen werden.
+        return local_datetime.isoformat()
 
     @staticmethod
     def _extract_output_text(response_data):
