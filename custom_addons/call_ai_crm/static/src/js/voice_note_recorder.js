@@ -10,6 +10,10 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
  * Die Aufnahme entsteht im Browser und wird nach dem Stoppen an das
  * Odoo-Backend übertragen. Erst das Backend kommuniziert mit OpenAI,
  * damit der API-Schlüssel niemals an den Browser ausgeliefert wird.
+ *
+ * Nach der Transkription wird der erkannte Text in einem zweiten,
+ * getrennten Schritt analysiert. Die Analyse ist zunächst nur ein
+ * Vorschlag und verändert noch keine CRM-Felder.
  */
 export class VoiceNoteRecorder extends Component {
     static template = "call_ai_crm.VoiceNoteRecorder";
@@ -19,7 +23,9 @@ export class VoiceNoteRecorder extends Component {
         this.state = useState({
             recording: false,
             transcribing: false,
+            analyzing: false,
             transcript: null,
+            analysis: null,
             error: null,
         });
 
@@ -28,9 +34,10 @@ export class VoiceNoteRecorder extends Component {
         this.audioChunks = [];
 
         /*
-         * Das Transkript gehört immer nur zur aktuellen Nachbearbeitung.
-         * Sobald Speichern, Verwerfen oder ein anderer Ablauf den Status
-         * "post_processing" verlässt, werden die temporären Daten entfernt.
+         * Transkript und Analyse gehören immer nur zur aktuellen
+         * Nachbearbeitung. Sobald Speichern, Verwerfen oder ein anderer
+         * Ablauf den Status "post_processing" verlässt, werden die
+         * temporären Daten entfernt.
          */
         onWillUpdateProps((nextProps) => {
             const currentStatus = this.props.record.data.call_status;
@@ -57,12 +64,18 @@ export class VoiceNoteRecorder extends Component {
     }
 
     async startRecording() {
-        if (!this.canRecord || this.state.recording || this.state.transcribing) {
+        if (
+            !this.canRecord ||
+            this.state.recording ||
+            this.state.transcribing ||
+            this.state.analyzing
+        ) {
             return;
         }
 
         this.state.error = null;
         this.state.transcript = null;
+        this.state.analysis = null;
 
         try {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -151,12 +164,50 @@ export class VoiceNoteRecorder extends Component {
             }
 
             this.state.transcript = result.text;
+            await this.analyzeTranscript(result.text);
         } catch (error) {
             this.state.error =
                 error.message ||
                 "Die Voice-Note konnte nicht transkribiert werden.";
         } finally {
             this.state.transcribing = false;
+        }
+    }
+
+    async analyzeTranscript(transcript) {
+        this.state.analyzing = true;
+        this.state.analysis = null;
+
+        try {
+            const formData = new FormData();
+            formData.append("transcript", transcript);
+            formData.append("csrf_token", odoo.csrf_token);
+
+            const response = await fetch("/call_ai_crm/analyze", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin",
+            });
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                throw new Error(
+                    "Der Server hat keine gültige Analyse geliefert."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result.error ||
+                    "Das Transkript konnte nicht analysiert werden."
+                );
+            }
+
+            this.state.analysis = result.analysis;
+        } finally {
+            this.state.analyzing = false;
         }
     }
 
@@ -178,7 +229,9 @@ export class VoiceNoteRecorder extends Component {
         this.mediaRecorder = null;
         this.state.recording = false;
         this.state.transcribing = false;
+        this.state.analyzing = false;
         this.state.transcript = null;
+        this.state.analysis = null;
         this.state.error = null;
     }
 
