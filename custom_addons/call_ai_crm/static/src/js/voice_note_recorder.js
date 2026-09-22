@@ -97,6 +97,22 @@ export class VoiceNoteRecorder extends Component {
         this.state.recording = false;
     }
 
+    downloadRecording() {
+        if (!this.state.audioUrl) {
+            return;
+        }
+
+        const mimeType = this.mediaRecorder?.mimeType || "audio/webm";
+        const extension = mimeType.includes("ogg") ? "ogg" : "webm";
+        const link = document.createElement("a");
+
+        link.href = this.state.audioUrl;
+        link.download = `voice-note.${extension}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
     stopMediaStream() {
         if (!this.mediaStream) {
             return;
