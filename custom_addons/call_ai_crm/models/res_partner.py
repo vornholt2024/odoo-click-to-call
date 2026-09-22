@@ -305,13 +305,13 @@ class ResPartner(models.Model):
         })
 
     def _set_post_processing_lock(self):
-        """Setzt ab Gesprächsende zehn Minuten für die Nachbearbeitung."""
+        """Setzt ab Gesprächsende 30 Minuten für die Nachbearbeitung."""
         self.ensure_one()
 
         end_time = self.call_end or fields.Datetime.now()
 
         self.write({
-            'lock_until': end_time + timedelta(minutes=10),
+            'lock_until': end_time + timedelta(minutes=30),
         })
 
     def _release_call_lock(self):
@@ -547,7 +547,7 @@ class ResPartner(models.Model):
             'current_call_history_id': history.id,
             'call_status': 'post_processing',
             'draft_result': self.lead_status,
-            'lock_until': call_end + timedelta(minutes=10),
+            'lock_until': call_end + timedelta(minutes=30),
         })
 
         return True
