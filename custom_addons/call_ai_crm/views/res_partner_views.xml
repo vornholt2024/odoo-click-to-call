@@ -32,6 +32,7 @@
                         <field name="objection_internal"/>
                         <field name="objection_other_partner"/>
                         <field name="objection_price"/>
+                        <field name="lead_status"/>
                     </group>
 
 
