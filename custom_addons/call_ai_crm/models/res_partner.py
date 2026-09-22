@@ -138,6 +138,14 @@ class ResPartner(models.Model):
         string="Wiedervorlage"
     )
 
+    # Technisches Ankerfeld für das Voice-Note-Widget im Browser.
+    # Die Aufnahme selbst wird in diesem ersten Schritt noch nicht in
+    # der Datenbank gespeichert, sondern nur lokal im Browser gehalten.
+    voice_note_control = fields.Char(
+        string="Voice-Note",
+        compute="_compute_voice_note_control"
+    )
+
     # ---------------------------------------------------------
     # EINWÄNDE DES AKTUELLEN GESPRÄCHS
     # ---------------------------------------------------------
@@ -696,6 +704,11 @@ class ResPartner(models.Model):
     # ---------------------------------------------------------
     # BERECHNUNGEN
     # ---------------------------------------------------------
+
+    def _compute_voice_note_control(self):
+        """Stellt das technische Ankerfeld für das Browser-Widget bereit."""
+        for rec in self:
+            rec.voice_note_control = ''
 
     @api.depends('call_start', 'call_end')
     def _compute_duration(self):
