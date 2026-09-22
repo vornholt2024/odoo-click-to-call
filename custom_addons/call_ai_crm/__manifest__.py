@@ -35,6 +35,8 @@
     'assets': {
         'web.assets_backend': [
             'call_ai_crm/static/src/js/microsip_call.js',
+            'call_ai_crm/static/src/js/voice_note_recorder.js',
+            'call_ai_crm/static/src/xml/voice_note_recorder.xml',
         ],
     },
 
