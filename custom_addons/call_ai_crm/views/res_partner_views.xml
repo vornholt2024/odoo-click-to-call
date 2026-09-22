@@ -172,10 +172,21 @@
                                 Momentaner Status
                             </strong>
 
+                            <!--
+                                Der aktuelle Status soll beim Öffnen des Kontakts
+                                sofort erkennbar sein. Das Badge nutzt die vorhandenen
+                                Odoo-Dekorationen und verändert keine Geschäftslogik.
+                            -->
                             <field name="lead_status"
                                 nolabel="1"
                                 readonly="1"
-                                style="max-width:220px;"/>
+                                widget="badge"
+                                decoration-muted="lead_status == 'new'"
+                                decoration-danger="lead_status == 'no_interest'"
+                                decoration-info="lead_status == 'interested'"
+                                decoration-success="lead_status in ('very_interested', 'customer')"
+                                style="font-size:14px;
+                                       font-weight:600;"/>
 
                         </div>
 
