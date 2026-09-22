@@ -85,7 +85,7 @@ Fokus:
 
 ## 👤 Autor
 
-Jörg Vornholt
+Heinz-Jörg Vornholt
 GitHub: https://github.com/vornholt2024
 
 ---

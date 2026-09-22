@@ -6,146 +6,644 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="priority" eval="1000"/>
+
         <field name="arch" type="xml">
 
             <xpath expr="//notebook" position="inside">
 
                 <page string="📞 B2B Akquise">
 
-                    <!-- Benötigte Felder für invisible -->
+                    <!--
+                        Technische Felder für die Steuerung der Oberfläche.
+                        Die Lock-Felder werden benötigt, damit die View zwischen
+                        eigener und fremder Reservierung unterscheiden kann.
+                    -->
                     <group invisible="1">
+                        <field name="call_status"/>
+                        <field name="current_call_history_id"/>
+
+                        <field name="lock_user_id"/>
+                        <field name="lock_until"/>
+                        <field name="lock_active"/>
+                        <field name="lock_owned_by_current_user"/>
+                        <field name="lock_owned_by_other_user"/>
+
                         <field name="objection_no_need"/>
                         <field name="objection_internal"/>
-                        <field name="objection_no_interest"/>
-                        <field name="objection_other"/>
-                        <field name="call_status"/>
+                        <field name="objection_other_partner"/>
+                        <field name="objection_price"/>
                     </group>
 
-                    <!-- Einwände -->
-                    <div style="display:flex; gap:12px; margin-bottom:24px;">
 
-                        <button name="action_toggle_no_need"
-                                type="object"
-                                string="Kein Bedarf"
-                                class="btn btn-outline-secondary"
-                                invisible="objection_no_need"/>
+                    <!-- =================================================
+                         1. IST-ZUSTAND
+                         ================================================= -->
+                    <div style="border:3px solid #cfd4da;
+                                border-radius:6px;
+                                padding:12px;
+                                margin-bottom:16px;">
 
-                        <button name="action_toggle_no_need"
-                                type="object"
-                                string="Kein Bedarf"
-                                class="btn btn-danger"
-                                invisible="not objection_no_need"/>
+                        <separator string="IST-ZUSTAND"/>
 
-                        <button name="action_toggle_internal"
-                                type="object"
-                                string="Internes Programm"
-                                class="btn btn-outline-secondary"
-                                invisible="objection_internal"/>
+                        <div style="display:flex;
+                                    align-items:center;
+                                    gap:8px;
+                                    margin-bottom:12px;">
 
-                        <button name="action_toggle_internal"
-                                type="object"
-                                string="Internes Programm"
-                                class="btn btn-danger"
-                                invisible="not objection_internal"/>
+                            <strong>B2B-Akquise aktiv</strong>
 
-                        <button name="action_toggle_no_interest"
-                                type="object"
-                                string="Kein Interesse"
-                                class="btn btn-outline-secondary"
-                                invisible="objection_no_interest"/>
+                            <field name="is_lead"
+                                nolabel="1"/>
 
-                        <button name="action_toggle_no_interest"
-                                type="object"
-                                string="Kein Interesse"
-                                class="btn btn-danger"
-                                invisible="not objection_no_interest"/>
+                        </div>
 
-                        <button name="action_toggle_other"
-                                type="object"
-                                string="Andere Partner"
-                                class="btn btn-outline-secondary"
-                                invisible="objection_other"/>
 
-                        <button name="action_toggle_other"
-                                type="object"
-                                string="Andere Partner"
-                                class="btn btn-danger"
-                                invisible="not objection_other"/>
+                        <!-- Fünf Kennzahlen in einer gemeinsamen Kartenzeile -->
+                        <div style="display:grid;
+                                    grid-template-columns:repeat(5, 1fr);
+                                    gap:10px;
+                                    margin-bottom:16px;">
 
+                            <div style="border:2px solid #b8bec5;
+                                        border-radius:6px;
+                                        padding:10px 12px;
+                                        min-height:66px;">
+
+                                <div style="font-size:18px;
+                                            font-weight:600;">
+                                    <field name="call_count"
+                                        nolabel="1"
+                                        readonly="1"/>
+                                </div>
+
+                                <div style="font-size:12px;">
+                                    Anrufe gesamt
+                                </div>
+
+                            </div>
+
+
+                            <div style="border:2px solid #b8bec5;
+                                        border-radius:6px;
+                                        padding:10px 12px;
+                                        min-height:66px;">
+
+                                <div style="font-size:18px;
+                                            font-weight:600;">
+                                    <field name="call_total_duration"
+                                        nolabel="1"
+                                        readonly="1"/>
+                                </div>
+
+                                <div style="font-size:12px;">
+                                    Gesamtdauer
+                                </div>
+
+                            </div>
+
+
+                            <div style="border:2px solid #b8bec5;
+                                        border-radius:6px;
+                                        padding:10px 12px;
+                                        min-height:66px;">
+
+                                <div style="font-size:18px;
+                                            font-weight:600;">
+                                    <field name="call_average_duration"
+                                        nolabel="1"
+                                        readonly="1"/>
+                                </div>
+
+                                <div style="font-size:12px;">
+                                    Ø Gesprächsdauer
+                                </div>
+
+                            </div>
+
+
+                            <div style="border:2px solid #b8bec5;
+                                        border-radius:6px;
+                                        padding:10px 12px;
+                                        min-height:66px;">
+
+                                <div style="font-size:16px;
+                                            font-weight:600;">
+                                    <field name="last_call_date"
+                                        nolabel="1"
+                                        readonly="1"/>
+                                </div>
+
+                                <div style="font-size:12px;">
+                                    Letzter Anruf
+                                </div>
+
+                            </div>
+
+
+                            <div style="border:2px solid #b8bec5;
+                                        border-radius:6px;
+                                        padding:10px 12px;
+                                        min-height:66px;">
+
+                                <div style="font-size:16px;
+                                            font-weight:600;">
+                                    <field name="next_call_date"
+                                        nolabel="1"
+                                        readonly="1"/>
+                                </div>
+
+                                <div style="font-size:12px;">
+                                    Nächste Wiedervorlage
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Aktueller Leadstatus -->
+                        <div style="display:flex;
+                                    align-items:center;
+                                    gap:12px;
+                                    margin-bottom:12px;">
+
+                            <strong style="width:200px;
+                                           flex-shrink:0;">
+                                Momentaner Status
+                            </strong>
+
+                            <field name="lead_status"
+                                nolabel="1"
+                                readonly="1"
+                                style="max-width:220px;"/>
+
+                        </div>
+
+
+                        <!-- Dauerhafte Kurznotiz zum Kontakt -->
+                        <!--
+                            Das Textfeld erhält durch Odoo einen kleinen zusätzlichen
+                            Innenabstand. Die geringere Breite gleicht diesen optisch aus.
+                        -->
+                        <div style="display:flex;
+                                    align-items:flex-start;
+                                    gap:12px;
+                                    margin-bottom:18px;">
+
+                            <strong style="width:195px;
+                                           flex-shrink:0;">
+                                Kurznotiz zum Kontakt
+                            </strong>
+
+                            <field name="contact_notes"
+                                nolabel="1"
+                                placeholder="Dauerhafte Hinweise zum Kontakt ..."
+                                style="width:70%;"/>
+
+                        </div>
                     </div>
 
-                    <!-- Telefon -->
-                    <div style="display:flex; gap:12px; margin-bottom:24px;">
 
-                        <button name="action_start_call"
-                                type="object"
-                                string="📞 Start"
-                                class="btn btn-success"
-                                invisible="call_status == 'in_call'"/>
+                    <!-- =================================================
+                         2. AKTUELLES GESPRÄCH
+                         ================================================= -->
+                    <div style="border:3px solid #cfd4da;
+                                border-radius:6px;
+                                padding:12px;
+                                margin-bottom:16px;">
 
-                        <button name="action_start_call"
-                                type="object"
-                                string="📞 Start"
-                                class="btn btn-outline-secondary"
-                                invisible="call_status != 'in_call'"/>
+                        <separator string="AKTUELLES GESPRÄCH"/>
 
-                        <button name="action_end_call"
-                                type="object"
-                                string="⏹️ Ende"
-                                class="btn btn-danger"
-                                invisible="call_status != 'in_call'"/>
+                        <div style="display:grid;
+                                    grid-template-columns:minmax(0, 1fr) 210px;
+                                    gap:20px;
+                                    align-items:stretch;
+                                    margin-top:8px;
+                                    margin-bottom:18px;">
 
-                        <button name="action_end_call"
-                                type="object"
-                                string="⏹️ Ende"
-                                class="btn btn-outline-secondary"
-                                invisible="call_status == 'in_call'"/>
+                            <!-- Linker Bereich des aktuellen Gesprächs -->
+                            <div style="min-width:0;">
 
+                                <!-- Erste Zeile: Telefonie, Dauer, Voice-Note und Ergebnis -->
+                                <div style="display:flex;
+                                            align-items:center;
+                                            gap:10px;
+                                            margin-bottom:16px;
+                                            flex-wrap:nowrap;">
+
+                                    <div style="display:flex;
+                                                align-items:center;
+                                                gap:8px;
+                                                flex-shrink:0;">
+
+                                        <!--
+                                            Start ist nur möglich, wenn kein Vorgang läuft
+                                            und keine fremde Reservierung aktiv ist.
+                                        -->
+                                        <button name="action_start_call"
+                                                type="object"
+                                                string="📞 Start"
+                                                class="btn btn-success"
+                                                invisible="call_status != 'idle' or lock_owned_by_other_user"/>
+
+                                        <button name="action_start_call"
+                                                type="object"
+                                                string="📞 Start"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'idle' and not lock_owned_by_other_user"
+                                                disabled="1"/>
+
+
+                                        <!--
+                                            Nur der Mitarbeiter, dem der laufende Vorgang
+                                            gehört, darf das Telefonat beenden.
+                                        -->
+                                        <button name="action_end_call"
+                                                type="object"
+                                                string="⏹ Ende"
+                                                class="btn btn-danger"
+                                                invisible="call_status != 'in_call' or not lock_owned_by_current_user"/>
+
+                                        <button name="action_end_call"
+                                                type="object"
+                                                string="⏹ Ende"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'in_call' and lock_owned_by_current_user"
+                                                disabled="1"/>
+
+                                    </div>
+
+
+                                    <!-- Die Dauer wird nicht als Live-Timer geführt. -->
+                                    <div style="display:flex;
+                                                align-items:center;
+                                                gap:4px;
+                                                flex-shrink:0;">
+
+                                        <span>🕒</span>
+
+                                        <field name="call_duration"
+                                            nolabel="1"
+                                            readonly="1"
+                                            style="width:55px;"/>
+
+                                    </div>
+
+
+                                    <!--
+                                        Platzhalter für die spätere Voice-Note-Funktion.
+                                        Bewusst kein Odoo-Button, solange noch keine Methode existiert.
+                                    -->
+                                    <span style="display:inline-block;
+                                                padding:6px 10px;
+                                                border:1px solid #adb5bd;
+                                                border-radius:4px;
+                                                color:#6c757d;
+                                                background:#f8f9fa;
+                                                white-space:nowrap;
+                                                flex-shrink:0;">
+                                        🎙 Voice-Note aufnehmen
+                                    </span>
+
+
+                                    <!--
+                                        Für das Ergebnis wird dauerhaft Platz reserviert.
+                                        Dadurch verändert sich die Anordnung nicht, wenn noch
+                                        kein Wert angezeigt wird.
+                                    -->
+                                    <div style="display:flex;
+                                                align-items:center;
+                                                gap:8px;
+                                                min-width:245px;
+                                                margin-left:4px;">
+
+                                        <span style="white-space:nowrap;">
+                                            Status nach Telefonat
+                                        </span>
+
+                                        <div style="min-width:120px;
+                                                    min-height:30px;
+                                                    border:1px solid #dee2e6;
+                                                    border-radius:4px;
+                                                    padding:2px 6px;">
+
+                                            <field name="draft_result"
+                                                nolabel="1"
+                                                readonly="call_status != 'post_processing' or not lock_owned_by_current_user"
+                                                style="width:100%;"/>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Zweite Zeile: Einwände -->
+                                <div style="margin-bottom:16px;">
+
+                                    <strong>Aktuelle Einwände</strong>
+
+                                    <div style="display:flex;
+                                                gap:8px;
+                                                margin-top:8px;
+                                                flex-wrap:nowrap;">
+
+                                        <button name="action_toggle_no_need"
+                                                type="object"
+                                                string="Kein Bedarf"
+                                                class="btn btn-outline-secondary"
+                                                invisible="objection_no_need"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+                                        <button name="action_toggle_no_need"
+                                                type="object"
+                                                string="Kein Bedarf"
+                                                class="btn btn-danger"
+                                                invisible="not objection_no_need"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+
+                                        <button name="action_toggle_internal"
+                                                type="object"
+                                                string="Internes Programm"
+                                                class="btn btn-outline-secondary"
+                                                invisible="objection_internal"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+                                        <button name="action_toggle_internal"
+                                                type="object"
+                                                string="Internes Programm"
+                                                class="btn btn-danger"
+                                                invisible="not objection_internal"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+
+                                        <button name="action_toggle_other_partner"
+                                                type="object"
+                                                string="Andere Partner"
+                                                class="btn btn-outline-secondary"
+                                                invisible="objection_other_partner"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+                                        <button name="action_toggle_other_partner"
+                                                type="object"
+                                                string="Andere Partner"
+                                                class="btn btn-danger"
+                                                invisible="not objection_other_partner"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+
+                                        <button name="action_toggle_price"
+                                                type="object"
+                                                string="Kosten / Preis"
+                                                class="btn btn-outline-secondary"
+                                                invisible="objection_price"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+                                        <button name="action_toggle_price"
+                                                type="object"
+                                                string="Kosten / Preis"
+                                                class="btn btn-danger"
+                                                invisible="not objection_price"
+                                                disabled="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+                                    </div>
+                                </div>
+
+
+                                <!-- Dritte Zeile: Gesprächsnotiz und Wiedervorlage -->
+                                <div style="display:grid;
+                                            grid-template-columns:minmax(0, 2fr) minmax(190px, 1fr);
+                                            gap:20px;
+                                            align-items:start;">
+
+                                    <div>
+
+                                        <strong>Gesprächsnotiz</strong>
+
+                                        <!--
+                                            Der Rahmen bleibt auch außerhalb der Nachbearbeitung
+                                            sichtbar. Dadurch ist die Position der Notiz immer
+                                            eindeutig erkennbar.
+                                        -->
+                                        <div style="margin-top:8px;
+                                                    min-height:62px;
+                                                    border:1px solid #dee2e6;
+                                                    border-radius:4px;
+                                                    padding:4px 6px;">
+
+                                            <field name="draft_note"
+                                                nolabel="1"
+                                                placeholder="Gesprächsnotiz ..."
+                                                readonly="call_status != 'post_processing' or not lock_owned_by_current_user"
+                                                style="width:100%;"/>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div>
+
+                                        <strong>Wiedervorlage</strong>
+
+                                        <!-- Auch für die Wiedervorlage bleibt der Platz sichtbar. -->
+                                        <div style="margin-top:8px;
+                                                    min-height:62px;
+                                                    border:1px solid #dee2e6;
+                                                    border-radius:4px;
+                                                    padding:4px 6px;">
+
+                                            <field name="draft_followup"
+                                                nolabel="1"
+                                                readonly="call_status != 'post_processing' or not lock_owned_by_current_user"
+                                                style="width:100%;"/>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =================================================
+                                 RESERVIERUNG UND ABSCHLUSS
+                                 ================================================= -->
+                            <div style="border:2px solid #dee2e6;
+                                        border-radius:6px;
+                                        padding:14px;
+                                        min-height:100%;
+                                        box-sizing:border-box;">
+
+
+                                <!-- Keine aktive Reservierung -->
+                                <div invisible="lock_active"
+                                     style="margin-bottom:30px;">
+
+                                    <strong>Kontakt ist nicht reserviert</strong>
+
+                                </div>
+
+
+                                <!-- Eigene Reservierung -->
+                                <div invisible="not lock_owned_by_current_user"
+                                     style="margin-bottom:30px;">
+
+                                    <strong>Kontakt ist reserviert</strong>
+
+                                    <div style="margin-top:6px;">
+                                        von mir
+                                    </div>
+
+                                    <div style="margin-top:4px;">
+                                        bis
+                                        <field name="lock_until"
+                                               nolabel="1"
+                                               readonly="1"/>
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Reservierung durch einen anderen Mitarbeiter -->
+                                <div invisible="not lock_owned_by_other_user"
+                                     style="margin-bottom:30px;">
+
+                                    <strong>Kontakt wird bearbeitet von</strong>
+
+                                    <div style="margin-top:6px;">
+                                        <field name="lock_user_id"
+                                               nolabel="1"
+                                               readonly="1"/>
+                                    </div>
+
+                                    <div style="margin-top:4px;">
+                                        bis
+                                        <field name="lock_until"
+                                               nolabel="1"
+                                               readonly="1"/>
+                                    </div>
+
+                                </div>
+
+
+                                <!-- Abschluss der Nachbearbeitung -->
+                                <div>
+
+                                    <strong>Beenden</strong>
+
+                                    <div style="display:flex;
+                                                gap:8px;
+                                                margin-top:10px;
+                                                flex-wrap:wrap;">
+
+                                        <!--
+                                            Speichern und Verwerfen sind nur für den
+                                            Besitzer der Nachbearbeitung aktiv.
+                                        -->
+                                        <button name="action_save_call_processing"
+                                                type="object"
+                                                string="Speichern"
+                                                class="btn btn-success"
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+                                        <button name="action_discard_call_processing"
+                                                type="object"
+                                                string="Verwerfen"
+                                                class="btn btn-danger"
+                                                invisible="call_status != 'post_processing' or not lock_owned_by_current_user"/>
+
+
+                                        <!--
+                                            In allen anderen Zuständen bleiben die beiden
+                                            Schaltflächen sichtbar, aber deaktiviert.
+                                        -->
+                                        <button name="action_save_call_processing"
+                                                type="object"
+                                                string="Speichern"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'post_processing' and lock_owned_by_current_user"
+                                                disabled="1"/>
+
+                                        <button name="action_discard_call_processing"
+                                                type="object"
+                                                string="Verwerfen"
+                                                class="btn btn-outline-secondary"
+                                                invisible="call_status == 'post_processing' and lock_owned_by_current_user"
+                                                disabled="1"/>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
                     </div>
 
-                    <!-- Daten -->
-                    <group col="2">
 
-                        <group string="Lead">
-                            <field name="is_lead"/>
-                            <field name="lead_status"/>
-                            <field name="next_call_date"/>
-                        </group>
+                    <!-- =================================================
+                         3. CALL HISTORY
+                         ================================================= -->
+                    <div style="border:3px solid #cfd4da;
+                                border-radius:6px;
+                                padding:12px;
+                                margin-bottom:16px;">
 
-                        <group string="Anruf">
+                        <separator string="FRÜHERE ANRUFE"/>
 
-                            <field name="call_status"
-                                   widget="badge"
-                                   decoration-success="call_status == 'idle'"
-                                   decoration-danger="call_status == 'in_call'"/>
+                        <field name="call_history_ids"
+                            nolabel="1"
+                            readonly="1">
 
-                            <field name="call_start"/>
-                            <field name="call_end"/>
-                            <field name="call_duration"/>
+                            <tree create="0"
+                                  delete="0"
+                                  edit="0">
 
-                            <field name="call_count" readonly="1"/>
-                            <field name="call_total_duration" readonly="1"/>
+                                <!-- Zeitpunkt des Telefonats -->
+                                <field name="call_start"
+                                    string="Datum"/>
 
-                        </group>
+                                <!-- Beim Telefonat verwendete Telefonnummer -->
+                                <field name="phone_number"
+                                    string="Nummer"/>
 
-                    </group>
+                                <!-- Kompaktes Mitarbeiterkürzel -->
+                                <field name="advisor_initials"
+                                    string="MA"/>
 
-                    <!-- Call History -->
-                    <group string="Call History">
-                        <field name="call_history_ids">
-                            <tree>
-                                <field name="call_start"/>
-                                <field name="call_end"/>
-                                <field name="duration"/>
+                                <field name="duration"
+                                    string="Dauer"/>
+
+                                <field name="result_stage"
+                                    string="Ergebnis"/>
+
+                                <!--
+                                    Die Einwände bleiben intern als einzelne Boolean-Felder
+                                    gespeichert und werden hier kompakt zusammengefasst.
+                                -->
+                                <field name="objections_display"
+                                    string="Einwände"/>
+
+                                <field name="note"
+                                    string="Notiz"/>
+
+                                <!-- Nur eine vorhandene Wiedervorlage wird angezeigt. -->
+                                <field name="followup_date"
+                                    string="Wiedervorlage"/>
+
                             </tree>
+
                         </field>
-                    </group>
+
+                    </div>
 
                 </page>
 
             </xpath>
 
         </field>
+
     </record>
 
 </odoo>

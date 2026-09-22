@@ -11,7 +11,7 @@
         - Vorbereitung für KI-Analyse
     """,
 
-    'author': 'Jörg Vornholt',
+    'author': 'Heinz-Jörg Vornholt',
     'category': 'CRM',
 
     'depends': [
@@ -20,7 +20,13 @@
     ],
 
     'data': [
-        'security/ir.model.access.csv',   # 🔥 WICHTIG für Call History
+        # Zugriffsrechte für die eigenen Datenmodelle
+        'security/ir.model.access.csv',
+
+        # Zeitgesteuerte Verarbeitung abgelaufener Soft-Locks
+        'data/call_lock_cron.xml',
+
+        # Erweiterung der Kontaktansicht
         'views/res_partner_views.xml',
     ],
 
