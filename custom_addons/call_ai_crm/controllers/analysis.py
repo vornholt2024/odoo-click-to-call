@@ -30,10 +30,10 @@ ANALYSIS_SCHEMA = {
             "items": {
                 "type": "string",
                 "enum": [
-                    "no_need",
-                    "internal_program",
-                    "other_partner",
-                    "price",
+                    "Kein Bedarf",
+                    "Internes Programm",
+                    "Andere Partner",
+                    "Kosten / Preis",
                 ],
             },
         },
@@ -93,10 +93,9 @@ class CallAiCrmAnalysisController(http.Controller):
             "very_interested = deutliches oder konkretes Interesse, customer = "
             "bereits Kunde bzw. verbindlicher Kundenstatus. 'new' darf niemals "
             "zurückgegeben werden. "
-            "Erkenne nur diese Einwände: no_need = kein Bedarf, "
-            "internal_program = eigenes/internes Programm, other_partner = "
-            "Zusammenarbeit mit anderen Partnern, price = Kosten oder Preis. "
-            "Mehrere Einwände dürfen gleichzeitig vorkommen. "
+            "Erkenne nur diese Einwände: Kein Bedarf, Internes Programm, "
+            "Andere Partner und Kosten / Preis. Mehrere Einwände dürfen "
+            "gleichzeitig vorkommen. "
             "Erkenne eine gewünschte Wiedervorlage. Übernimm eine relative "
             "Zeitangabe wie 'nächsten Dienstag' wortgetreu in "
             "followup_expression. Wenn keine Wiedervorlage genannt wird, setze "
@@ -105,7 +104,10 @@ class CallAiCrmAnalysisController(http.Controller):
             "Die note ist eine kurze, sachliche, sinngemäße Gesprächsnotiz. "
             "Relevante Fakten müssen erhalten bleiben. Insbesondere gesuchte "
             "Fachkräfte wie Physiotherapeuten, Pflegefachkräfte oder Ärzte "
-            "müssen in der Notiz genannt werden. Erfinde keine Informationen."
+            "müssen in der Notiz genannt werden. Erfinde keine Informationen. "
+            "Informationen zur Wiedervorlage gehören ausschließlich in die "
+            "dafür vorgesehenen followup-Felder und dürfen nicht zusätzlich "
+            "in der note wiederholt werden."
         )
 
         payload = {
