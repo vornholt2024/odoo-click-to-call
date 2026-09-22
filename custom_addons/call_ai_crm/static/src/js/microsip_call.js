@@ -9,11 +9,12 @@ import { registry } from "@web/core/registry";
  * für das Protokoll "sip:" die registrierte Anwendung, in unserem Fall
  * MicroSIP. Ein Rückkanal von MicroSIP zu Odoo ist nicht vorgesehen.
  *
- * Nach dem Start wird die aktuelle Odoo-Ansicht neu geladen, damit der
- * bereits im Backend gespeicherte Gesprächsstatus und die Reservierung
- * ohne manuelles Aktualisieren sichtbar werden.
+ * Nach dem Protokollaufruf wird nur die aktuelle Odoo-Ansicht neu geladen.
+ * Dadurch werden Gesprächsstatus und Reservierung aktualisiert, ohne die
+ * komplette Browserseite neu zu laden und den geöffneten Notebook-Reiter
+ * zu verlieren.
  */
-function openMicroSip(env, action) {
+async function openMicroSip(env, action) {
     const sipUri = action.params?.sip_uri;
 
     if (!sipUri || !sipUri.startsWith("sip:")) {
@@ -22,12 +23,14 @@ function openMicroSip(env, action) {
 
     window.location.href = sipUri;
 
-    // Der Protokollaufruf wird zuerst an Windows übergeben. Eine kurze
-    // Verzögerung verhindert, dass der anschließende Reload diesen Aufruf
-    // unmittelbar wieder verdrängt.
-    window.setTimeout(() => {
-        window.location.reload();
-    }, 1000);
+    // Der SIP-Aufruf wird zuerst an Windows übergeben. Anschließend lädt
+    // Odoo nur die aktuelle Ansicht neu; der geöffnete Notebook-Reiter
+    // bleibt dadurch erhalten.
+    await new Promise((resolve) => window.setTimeout(resolve, 1000));
+    await env.services.action.doAction({
+        type: "ir.actions.client",
+        tag: "soft_reload",
+    });
 }
 
 registry.category("actions").add("call_ai_crm_microsip", openMicroSip);
