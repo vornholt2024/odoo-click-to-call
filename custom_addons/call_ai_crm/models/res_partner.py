@@ -482,9 +482,22 @@ class ResPartner(models.Model):
             'call_status': 'in_call',
         })
 
-        # Die aufbereitete Nummer wird später für den Aufruf
-        # von MicroSIP verwendet.
-        return True
+        # MicroSIP läuft außerhalb von Odoo auf dem Windows-Arbeitsplatz.
+        # Der Browser übergibt die SIP-Adresse deshalb an den in Windows
+        # registrierten Protokollhandler. Odoo erhält von MicroSIP bewusst
+        # keine Rückmeldung über Annahme oder Ende des Gesprächs.
+        sip_number = number
+
+        # Für die SIP-Adresse wird die internationale Schreibweise mit
+        # führendem Plus verwendet. Die interne Aufbereitung liefert 0049.
+        if sip_number.startswith("0049"):
+            sip_number = "+49" + sip_number[4:]
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f"sip:{sip_number}",
+            'target': 'self',
+        }
 
     # ---------------------------------------------------------
     # TELEFONAT BEENDEN
