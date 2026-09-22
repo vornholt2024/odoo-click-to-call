@@ -38,50 +38,15 @@
             </span>
 
             <!--
-                Transkript und Analyse werden in diesem Entwicklungsschritt
-                bewusst nur zur Funktionskontrolle angezeigt. Die Werte werden
-                noch nicht automatisch in die CRM-Felder übernommen.
+                Transkript und technische KI-Ausgabe werden nach der
+                Entwicklungsphase nicht mehr angezeigt. Der Mitarbeiter
+                prüft stattdessen direkt die vorbelegten Entwurfsfelder.
             -->
-            <div t-if="state.transcript"
-                 style="width:100%;
-                        margin-top:4px;
-                        white-space:normal;">
-                <strong>Transkript:</strong>
-                <t t-esc="state.transcript"/>
-            </div>
-
-            <div t-if="state.analysis"
-                 style="width:100%;
-                        margin-top:4px;
-                        white-space:normal;">
-                <strong>KI-Vorschlag:</strong>
-                <div>
-                    Leadstatus:
-                    <t t-esc="state.analysis.lead_status"/>
-                </div>
-                <div>
-                    Einwände:
-                    <t t-esc="state.analysis.objections.join(', ') || 'keine'"/>
-                </div>
-                <div>
-                    Wiedervorlage:
-                    <t t-if="state.analysis.followup_requested">
-                        <t t-esc="state.analysis.followup_expression"/>
-                    </t>
-                    <t t-else="">keine</t>
-                </div>
-                <div t-if="state.analysis.followup_requested">
-                    Berechneter Termin:
-                    <t t-if="state.analysis.followup_datetime">
-                        <t t-esc="state.analysis.followup_datetime"/>
-                    </t>
-                    <t t-else="">nicht automatisch bestimmbar</t>
-                </div>
-                <div>
-                    Notiz:
-                    <t t-esc="state.analysis.note"/>
-                </div>
-            </div>
+            <span t-if="state.analysis"
+                  class="text-success"
+                  style="white-space:nowrap;">
+                Vorschläge übernommen
+            </span>
 
             <span t-if="state.error"
                   class="text-danger"
