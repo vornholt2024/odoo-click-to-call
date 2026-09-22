@@ -173,20 +173,45 @@
                             </strong>
 
                             <!--
-                                Der aktuelle Status soll beim Öffnen des Kontakts
-                                sofort erkennbar sein. Das Badge nutzt die vorhandenen
-                                Odoo-Dekorationen und verändert keine Geschäftslogik.
+                                Der aktuelle Status wird als klar sichtbares Badge
+                                dargestellt. Die fünf Varianten verwenden ausschließlich
+                                das vorhandene lead_status-Feld; die Geschäftslogik bleibt
+                                dadurch unverändert.
                             -->
-                            <field name="lead_status"
-                                nolabel="1"
-                                readonly="1"
-                                widget="badge"
-                                decoration-muted="lead_status == 'new'"
-                                decoration-danger="lead_status == 'no_interest'"
-                                decoration-info="lead_status == 'interested'"
-                                decoration-success="lead_status in ('very_interested', 'customer')"
-                                style="font-size:14px;
-                                       font-weight:600;"/>
+                            <span invisible="lead_status != 'new'"
+                                  class="badge rounded-pill text-bg-secondary"
+                                  style="font-size:14px;
+                                         padding:6px 12px;">
+                                Neu
+                            </span>
+
+                            <span invisible="lead_status != 'no_interest'"
+                                  class="badge rounded-pill text-bg-danger"
+                                  style="font-size:14px;
+                                         padding:6px 12px;">
+                                Kein Interesse
+                            </span>
+
+                            <span invisible="lead_status != 'interested'"
+                                  class="badge rounded-pill text-bg-info"
+                                  style="font-size:14px;
+                                         padding:6px 12px;">
+                                Interessiert
+                            </span>
+
+                            <span invisible="lead_status != 'very_interested'"
+                                  class="badge rounded-pill text-bg-success"
+                                  style="font-size:14px;
+                                         padding:6px 12px;">
+                                Sehr interessiert
+                            </span>
+
+                            <span invisible="lead_status != 'customer'"
+                                  class="badge rounded-pill text-bg-success"
+                                  style="font-size:14px;
+                                         padding:6px 12px;">
+                                Kunde
+                            </span>
 
                         </div>
 
