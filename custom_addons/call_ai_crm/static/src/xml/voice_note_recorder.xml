@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="call_ai_crm.VoiceNoteRecorder">
+        <div style="display:flex;
+                    align-items:center;
+                    gap:8px;
+                    flex-wrap:nowrap;">
+
+            <button type="button"
+                    class="btn btn-success"
+                    t-att-disabled="!canRecord || state.recording"
+                    t-on-click="startRecording">
+                🎙 Voice-Note
+            </button>
+
+            <button type="button"
+                    class="btn btn-danger"
+                    t-if="state.recording"
+                    t-on-click="stopRecording">
+                ⏹ Aufnahme stoppen
+            </button>
+
+            <span t-if="state.recording"
+                  style="white-space:nowrap;">
+                Aufnahme läuft …
+            </span>
+
+
+            <span t-if="state.error"
+                  class="text-danger"
+                  style="white-space:nowrap;"
+                  t-esc="state.error"/>
+
+        </div>
+    </t>
+
+</templates>
