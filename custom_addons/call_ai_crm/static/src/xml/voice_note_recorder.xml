@@ -9,7 +9,8 @@
 
             <button type="button"
                     class="btn btn-success"
-                    t-att-disabled="!canRecord || state.recording"
+                    t-if="!state.recording"
+                    t-att-disabled="!canRecord || state.transcribing"
                     t-on-click="startRecording">
                 🎙 Voice-Note
             </button>
@@ -26,10 +27,20 @@
                 Aufnahme läuft …
             </span>
 
+            <span t-if="state.transcribing"
+                  style="white-space:nowrap;">
+                Transkription läuft …
+            </span>
+
+            <span t-if="state.transcript"
+                  style="white-space:normal;">
+                <strong>Transkript:</strong>
+                <t t-esc="state.transcript"/>
+            </span>
 
             <span t-if="state.error"
                   class="text-danger"
-                  style="white-space:nowrap;"
+                  style="white-space:normal;"
                   t-esc="state.error"/>
 
         </div>
