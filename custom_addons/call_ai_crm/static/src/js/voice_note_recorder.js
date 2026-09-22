@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, onWillUnmount, useState } from "@odoo/owl";
+import { Component, onWillUnmount, onWillUpdateProps, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
@@ -26,6 +26,23 @@ export class VoiceNoteRecorder extends Component {
         this.mediaRecorder = null;
         this.mediaStream = null;
         this.audioChunks = [];
+
+        /*
+         * Das Transkript gehört immer nur zur aktuellen Nachbearbeitung.
+         * Sobald Speichern, Verwerfen oder ein anderer Ablauf den Status
+         * "post_processing" verlässt, werden die temporären Daten entfernt.
+         */
+        onWillUpdateProps((nextProps) => {
+            const currentStatus = this.props.record.data.call_status;
+            const nextStatus = nextProps.record.data.call_status;
+
+            if (
+                currentStatus === "post_processing" &&
+                nextStatus !== "post_processing"
+            ) {
+                this.clearTemporaryData();
+            }
+        });
 
         onWillUnmount(() => {
             this.stopMediaStream();
@@ -153,6 +170,16 @@ export class VoiceNoteRecorder extends Component {
         }
 
         return "voice-note.webm";
+    }
+
+    clearTemporaryData() {
+        this.stopMediaStream();
+        this.audioChunks = [];
+        this.mediaRecorder = null;
+        this.state.recording = false;
+        this.state.transcribing = false;
+        this.state.transcript = null;
+        this.state.error = null;
     }
 
     stopMediaStream() {
