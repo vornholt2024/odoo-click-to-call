@@ -30,6 +30,14 @@
         'views/res_partner_views.xml',
     ],
 
+    # Kleiner Browser-Baustein für die Übergabe der SIP-Adresse
+    # an den unter Windows registrierten MicroSIP-Protokollhandler.
+    'assets': {
+        'web.assets_backend': [
+            'call_ai_crm/static/src/js/microsip_call.js',
+        ],
+    },
+
     'installable': True,
     'application': True,
 
