@@ -70,6 +70,13 @@
                     </t>
                     <t t-else="">keine</t>
                 </div>
+                <div t-if="state.analysis.followup_requested">
+                    Berechneter Termin:
+                    <t t-if="state.analysis.followup_datetime">
+                        <t t-esc="state.analysis.followup_datetime"/>
+                    </t>
+                    <t t-else="">nicht automatisch bestimmbar</t>
+                </div>
                 <div>
                     Notiz:
                     <t t-esc="state.analysis.note"/>
