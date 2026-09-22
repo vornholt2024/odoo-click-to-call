@@ -10,6 +10,11 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
  * Die Aufnahme entsteht im Browser und wird nach dem Stoppen an das
  * Odoo-Backend übertragen. Erst das Backend kommuniziert mit OpenAI,
  * damit der API-Schlüssel niemals an den Browser ausgeliefert wird.
+ *
+ * Nach der Transkription wird der erkannte Text analysiert. Die daraus
+ * entstehenden Werte werden nur als Entwurf in die vorhandenen Felder
+ * der Nachbearbeitung übernommen. Der Mitarbeiter kann sie anschließend
+ * prüfen und ändern, bevor er sie mit "Speichern" bestätigt.
  */
 export class VoiceNoteRecorder extends Component {
     static template = "call_ai_crm.VoiceNoteRecorder";
@@ -19,7 +24,9 @@ export class VoiceNoteRecorder extends Component {
         this.state = useState({
             recording: false,
             transcribing: false,
+            analyzing: false,
             transcript: null,
+            analysis: null,
             error: null,
         });
 
@@ -28,9 +35,10 @@ export class VoiceNoteRecorder extends Component {
         this.audioChunks = [];
 
         /*
-         * Das Transkript gehört immer nur zur aktuellen Nachbearbeitung.
-         * Sobald Speichern, Verwerfen oder ein anderer Ablauf den Status
-         * "post_processing" verlässt, werden die temporären Daten entfernt.
+         * Transkript und Analyse gehören immer nur zur aktuellen
+         * Nachbearbeitung. Sobald Speichern, Verwerfen oder ein anderer
+         * Ablauf den Status "post_processing" verlässt, werden die
+         * temporären Daten entfernt.
          */
         onWillUpdateProps((nextProps) => {
             const currentStatus = this.props.record.data.call_status;
@@ -57,12 +65,18 @@ export class VoiceNoteRecorder extends Component {
     }
 
     async startRecording() {
-        if (!this.canRecord || this.state.recording || this.state.transcribing) {
+        if (
+            !this.canRecord ||
+            this.state.recording ||
+            this.state.transcribing ||
+            this.state.analyzing
+        ) {
             return;
         }
 
         this.state.error = null;
         this.state.transcript = null;
+        this.state.analysis = null;
 
         try {
             this.mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -151,6 +165,7 @@ export class VoiceNoteRecorder extends Component {
             }
 
             this.state.transcript = result.text;
+            await this.analyzeTranscript(result.text);
         } catch (error) {
             this.state.error =
                 error.message ||
@@ -158,6 +173,80 @@ export class VoiceNoteRecorder extends Component {
         } finally {
             this.state.transcribing = false;
         }
+    }
+
+    async analyzeTranscript(transcript) {
+        this.state.analyzing = true;
+        this.state.analysis = null;
+
+        try {
+            const formData = new FormData();
+            formData.append("transcript", transcript);
+            formData.append("csrf_token", odoo.csrf_token);
+
+            const response = await fetch("/call_ai_crm/analyze", {
+                method: "POST",
+                body: formData,
+                credentials: "same-origin",
+            });
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                throw new Error(
+                    "Der Server hat keine gültige Analyse geliefert."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result.error ||
+                    "Das Transkript konnte nicht analysiert werden."
+                );
+            }
+
+            this.state.analysis = result.analysis;
+            await this.applyAnalysisSuggestion(result.analysis);
+        } finally {
+            this.state.analyzing = false;
+        }
+    }
+
+    async applyAnalysisSuggestion(analysis) {
+        /*
+         * Die KI-Werte werden nur in die Entwurfsfelder übernommen.
+         * Erst der vorhandene Speichern-Button bestätigt die Daten fachlich.
+         */
+        const objections = new Set(analysis.objections || []);
+
+        /*
+         * Odoo erwartet Datetime-Werte im Datensatz als Luxon-DateTime.
+         * Die API liefert absichtlich einen ISO-Wert mit Zeitzone. Für das
+         * vorhandene Feld erzeugen wir daraus deshalb ein DateTime-Objekt.
+         */
+        let followupDateTime = false;
+
+        if (analysis.followup_requested && analysis.followup_datetime) {
+            const parsedDate = luxon.DateTime.fromISO(
+                analysis.followup_datetime,
+                { setZone: true }
+            );
+
+            if (parsedDate.isValid) {
+                followupDateTime = parsedDate.toUTC();
+            }
+        }
+
+        await this.props.record.update({
+            draft_result: analysis.lead_status || false,
+            draft_note: analysis.note || false,
+            draft_followup: followupDateTime,
+            objection_no_need: objections.has("Kein Bedarf"),
+            objection_internal: objections.has("Internes Programm"),
+            objection_other_partner: objections.has("Andere Partner"),
+            objection_price: objections.has("Kosten / Preis"),
+        });
     }
 
     getAudioFilename(mimeType) {
@@ -178,7 +267,9 @@ export class VoiceNoteRecorder extends Component {
         this.mediaRecorder = null;
         this.state.recording = false;
         this.state.transcribing = false;
+        this.state.analyzing = false;
         this.state.transcript = null;
+        this.state.analysis = null;
         this.state.error = null;
     }
 

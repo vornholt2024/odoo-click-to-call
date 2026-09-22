@@ -5,12 +5,12 @@
         <div style="display:flex;
                     align-items:center;
                     gap:8px;
-                    flex-wrap:nowrap;">
+                    flex-wrap:wrap;">
 
             <button type="button"
                     class="btn btn-success"
                     t-if="!state.recording"
-                    t-att-disabled="!canRecord || state.transcribing"
+                    t-att-disabled="!canRecord || state.transcribing || state.analyzing"
                     t-on-click="startRecording">
                 🎙 Voice-Note
             </button>
@@ -32,15 +32,61 @@
                 Transkription läuft …
             </span>
 
-            <span t-if="state.transcript"
-                  style="white-space:normal;">
+            <span t-if="state.analyzing"
+                  style="white-space:nowrap;">
+                KI-Analyse läuft …
+            </span>
+
+            <!--
+                Transkript und Analyse werden in diesem Entwicklungsschritt
+                bewusst nur zur Funktionskontrolle angezeigt. Die Werte werden
+                noch nicht automatisch in die CRM-Felder übernommen.
+            -->
+            <div t-if="state.transcript"
+                 style="width:100%;
+                        margin-top:4px;
+                        white-space:normal;">
                 <strong>Transkript:</strong>
                 <t t-esc="state.transcript"/>
-            </span>
+            </div>
+
+            <div t-if="state.analysis"
+                 style="width:100%;
+                        margin-top:4px;
+                        white-space:normal;">
+                <strong>KI-Vorschlag:</strong>
+                <div>
+                    Leadstatus:
+                    <t t-esc="state.analysis.lead_status"/>
+                </div>
+                <div>
+                    Einwände:
+                    <t t-esc="state.analysis.objections.join(', ') || 'keine'"/>
+                </div>
+                <div>
+                    Wiedervorlage:
+                    <t t-if="state.analysis.followup_requested">
+                        <t t-esc="state.analysis.followup_expression"/>
+                    </t>
+                    <t t-else="">keine</t>
+                </div>
+                <div t-if="state.analysis.followup_requested">
+                    Berechneter Termin:
+                    <t t-if="state.analysis.followup_datetime">
+                        <t t-esc="state.analysis.followup_datetime"/>
+                    </t>
+                    <t t-else="">nicht automatisch bestimmbar</t>
+                </div>
+                <div>
+                    Notiz:
+                    <t t-esc="state.analysis.note"/>
+                </div>
+            </div>
 
             <span t-if="state.error"
                   class="text-danger"
-                  style="white-space:normal;"
+                  style="width:100%;
+                         white-space:normal;"
                   t-esc="state.error"/>
 
         </div>
