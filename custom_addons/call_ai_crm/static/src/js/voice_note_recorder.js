@@ -2,7 +2,6 @@
 
 import { Component, onWillUnmount, onWillUpdateProps, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { deserializeDateTime } from "@web/core/l10n/dates";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 /**
@@ -221,24 +220,33 @@ export class VoiceNoteRecorder extends Component {
          */
         const objections = new Set(analysis.objections || []);
 
-        const changes = {
+        /*
+         * Odoo erwartet Datetime-Werte im Datensatz als Luxon-DateTime.
+         * Die API liefert absichtlich einen ISO-Wert mit Zeitzone. Für das
+         * vorhandene Feld erzeugen wir daraus deshalb ein DateTime-Objekt.
+         */
+        let followupDateTime = false;
+
+        if (analysis.followup_requested && analysis.followup_datetime) {
+            const parsedDate = luxon.DateTime.fromISO(
+                analysis.followup_datetime,
+                { setZone: true }
+            );
+
+            if (parsedDate.isValid) {
+                followupDateTime = parsedDate.toUTC();
+            }
+        }
+
+        await this.props.record.update({
             draft_result: analysis.lead_status || false,
             draft_note: analysis.note || false,
+            draft_followup: followupDateTime,
             objection_no_need: objections.has("Kein Bedarf"),
             objection_internal: objections.has("Internes Programm"),
             objection_other_partner: objections.has("Andere Partner"),
             objection_price: objections.has("Kosten / Preis"),
-        };
-
-        if (analysis.followup_requested && analysis.followup_datetime) {
-            changes.draft_followup = deserializeDateTime(
-                analysis.followup_datetime
-            );
-        } else {
-            changes.draft_followup = false;
-        }
-
-        await this.props.record.update(changes);
+        });
     }
 
     getAudioFilename(mimeType) {
