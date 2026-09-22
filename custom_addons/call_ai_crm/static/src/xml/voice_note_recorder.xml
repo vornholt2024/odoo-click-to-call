@@ -8,7 +8,7 @@
                     flex-wrap:nowrap;">
 
             <button type="button"
-                    class="btn btn-outline-secondary"
+                    class="btn btn-success"
                     t-att-disabled="!canRecord || state.recording"
                     t-on-click="startRecording">
                 🎙 Voice-Note
@@ -26,18 +26,6 @@
                 Aufnahme läuft …
             </span>
 
-            <audio t-if="state.audioUrl"
-                   t-att-src="state.audioUrl"
-                   controls="controls"
-                   style="height:32px;
-                          max-width:220px;"/>
-
-            <button type="button"
-                    class="btn btn-outline-secondary"
-                    t-if="state.audioUrl"
-                    t-on-click="downloadRecording">
-                Speichern
-            </button>
 
             <span t-if="state.error"
                   class="text-danger"
