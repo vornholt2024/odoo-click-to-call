@@ -91,7 +91,7 @@
 
                                 <div style="font-size:18px;
                                             font-weight:600;">
-                                    <field name="call_total_duration"
+                                    <field name="call_total_duration_display"
                                         nolabel="1"
                                         readonly="1"/>
                                 </div>
@@ -110,7 +110,7 @@
 
                                 <div style="font-size:18px;
                                             font-weight:600;">
-                                    <field name="call_average_duration"
+                                    <field name="call_average_duration_display"
                                         nolabel="1"
                                         readonly="1"/>
                                 </div>
@@ -129,7 +129,7 @@
 
                                 <div style="font-size:16px;
                                             font-weight:600;">
-                                    <field name="last_call_date"
+                                    <field name="last_call_date_display"
                                         nolabel="1"
                                         readonly="1"/>
                                 </div>
@@ -148,7 +148,7 @@
 
                                 <div style="font-size:16px;
                                             font-weight:600;">
-                                    <field name="next_call_date"
+                                    <field name="next_call_date_display"
                                         nolabel="1"
                                         readonly="1"/>
                                 </div>
@@ -319,7 +319,7 @@
 
                                         <span>🕒</span>
 
-                                        <field name="call_duration"
+                                        <field name="call_duration_display"
                                             nolabel="1"
                                             readonly="1"
                                             style="width:55px;"/>
@@ -659,7 +659,7 @@
                                   edit="0">
 
                                 <!-- Zeitpunkt des Telefonats -->
-                                <field name="call_start"
+                                <field name="call_start_display"
                                     string="Datum"/>
 
                                 <!-- Beim Telefonat verwendete Telefonnummer -->
@@ -670,7 +670,7 @@
                                 <field name="advisor_initials"
                                     string="MA"/>
 
-                                <field name="duration"
+                                <field name="duration_display"
                                     string="Dauer"/>
 
                                 <field name="result_stage"
@@ -687,7 +687,7 @@
                                     string="Notiz"/>
 
                                 <!-- Nur eine vorhandene Wiedervorlage wird angezeigt. -->
-                                <field name="followup_date"
+                                <field name="followup_date_display"
                                     string="Wiedervorlage"/>
 
                             </tree>
