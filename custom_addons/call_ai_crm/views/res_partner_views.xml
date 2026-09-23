@@ -660,18 +660,23 @@
 
                                 <!-- Zeitpunkt des Telefonats -->
                                 <field name="call_start_display"
-                                    string="Datum"/>
+                                    string="Datum"
+                                    width="90px"
+                                    style="white-space:pre-line;"/>
 
                                 <!-- Beim Telefonat verwendete Telefonnummer -->
                                 <field name="phone_number"
-                                    string="Nummer"/>
+                                    string="Nummer"
+                                    width="125px"/>
 
                                 <!-- Kompaktes Mitarbeiterkürzel -->
                                 <field name="advisor_initials"
-                                    string="MA"/>
+                                    string="MA"
+                                    width="55px"/>
 
                                 <field name="duration_display"
-                                    string="Dauer"/>
+                                    string="Dauer"
+                                    width="80px"/>
 
                                 <field name="result_stage"
                                     string="Ergebnis"/>
