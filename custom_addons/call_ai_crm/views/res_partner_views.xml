@@ -658,11 +658,19 @@
                                   delete="0"
                                   edit="0">
 
-                                <!-- Zeitpunkt des Telefonats -->
-                                <field name="call_start_display"
+                                <!--
+                                    Datum und Uhrzeit werden als zwei kompakte Spalten
+                                    ohne Sekunden dargestellt. Ein echter zweizeiliger
+                                    Zellinhalt ist in der Standard-Tree-View nicht
+                                    zuverlässig darstellbar.
+                                -->
+                                <field name="call_start_date_display"
                                     string="Datum"
-                                    width="90px"
-                                    style="white-space:pre-line;"/>
+                                    width="90px"/>
+
+                                <field name="call_start_time_display"
+                                    string="Zeit"
+                                    width="55px"/>
 
                                 <!-- Beim Telefonat verwendete Telefonnummer -->
                                 <field name="phone_number"
