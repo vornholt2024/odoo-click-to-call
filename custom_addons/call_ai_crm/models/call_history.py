@@ -127,8 +127,13 @@ class CallHistory(models.Model):
 
     # Anzeigehilfen für die Listenansicht. Die Originalwerte bleiben
     # sekundengenau gespeichert und werden nur für den Benutzer formatiert.
-    call_start_display = fields.Char(
-        string="Anrufzeit Anzeige",
+    call_start_date_display = fields.Char(
+        string="Anrufdatum Anzeige",
+        compute="_compute_time_display"
+    )
+
+    call_start_time_display = fields.Char(
+        string="Anrufuhrzeit Anzeige",
         compute="_compute_time_display"
     )
 
@@ -151,11 +156,15 @@ class CallHistory(models.Model):
                 local_call_start = fields.Datetime.context_timestamp(
                     rec, rec.call_start
                 )
-                rec.call_start_display = local_call_start.strftime(
-                    "%d.%m.%Y\\n%H:%M"
+                rec.call_start_date_display = local_call_start.strftime(
+                    "%d.%m.%Y"
+                )
+                rec.call_start_time_display = local_call_start.strftime(
+                    "%H:%M"
                 )
             else:
-                rec.call_start_display = False
+                rec.call_start_date_display = False
+                rec.call_start_time_display = False
 
             total_seconds = max(0, round((rec.duration or 0.0) * 60))
             minutes, seconds = divmod(total_seconds, 60)
