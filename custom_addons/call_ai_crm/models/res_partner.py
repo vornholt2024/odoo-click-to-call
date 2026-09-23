@@ -196,6 +196,82 @@ class ResPartner(models.Model):
         compute="_compute_call_stats"
     )
 
+
+    # Diese Felder bereiten Zeitwerte ausschließlich für die Anzeige auf.
+    # Die technischen Werte bleiben unverändert und sekundengenau erhalten.
+    call_total_duration_display = fields.Char(
+        string="Gesamtdauer",
+        compute="_compute_time_display"
+    )
+
+    call_average_duration_display = fields.Char(
+        string="Ø Gesprächsdauer",
+        compute="_compute_time_display"
+    )
+
+    call_duration_display = fields.Char(
+        string="Gesprächsdauer",
+        compute="_compute_time_display"
+    )
+
+    last_call_date_display = fields.Char(
+        string="Letzter Anruf",
+        compute="_compute_time_display"
+    )
+
+    next_call_date_display = fields.Char(
+        string="Nächste Wiedervorlage",
+        compute="_compute_time_display"
+    )
+
+    @staticmethod
+    def _format_duration_display(minutes):
+        """Formatiert eine Dauer in Minuten als MM:SS."""
+        total_seconds = max(0, round((minutes or 0.0) * 60))
+        display_minutes, seconds = divmod(total_seconds, 60)
+        return f"{display_minutes}:{seconds:02d} min"
+
+    @api.depends(
+        'call_total_duration',
+        'call_average_duration',
+        'call_duration',
+        'last_call_date',
+        'next_call_date'
+    )
+    @api.depends_context('tz')
+    def _compute_time_display(self):
+        """Formatiert Dauer und Datumswerte für die Akquise-Oberfläche."""
+        for rec in self:
+            rec.call_total_duration_display = self._format_duration_display(
+                rec.call_total_duration
+            )
+            rec.call_average_duration_display = self._format_duration_display(
+                rec.call_average_duration
+            )
+            rec.call_duration_display = self._format_duration_display(
+                rec.call_duration
+            )
+
+            if rec.last_call_date:
+                local_last_call = fields.Datetime.context_timestamp(
+                    rec, rec.last_call_date
+                )
+                rec.last_call_date_display = local_last_call.strftime(
+                    "%d.%m.%Y %H:%M"
+                )
+            else:
+                rec.last_call_date_display = False
+
+            if rec.next_call_date:
+                local_next_call = fields.Datetime.context_timestamp(
+                    rec, rec.next_call_date
+                )
+                rec.next_call_date_display = local_next_call.strftime(
+                    "%d.%m.%Y %H:%M"
+                )
+            else:
+                rec.next_call_date_display = False
+
     # ---------------------------------------------------------
     # TELEFONNUMMER AUFBEREITEN
     # ---------------------------------------------------------
