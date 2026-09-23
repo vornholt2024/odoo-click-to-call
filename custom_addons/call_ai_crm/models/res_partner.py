@@ -200,27 +200,27 @@ class ResPartner(models.Model):
     # Diese Felder bereiten Zeitwerte ausschließlich für die Anzeige auf.
     # Die technischen Werte bleiben unverändert und sekundengenau erhalten.
     call_total_duration_display = fields.Char(
-        string="Gesamtdauer",
+        string="Gesamtdauer Anzeige",
         compute="_compute_time_display"
     )
 
     call_average_duration_display = fields.Char(
-        string="Ø Gesprächsdauer",
+        string="Ø Gesprächsdauer Anzeige",
         compute="_compute_time_display"
     )
 
     call_duration_display = fields.Char(
-        string="Gesprächsdauer",
+        string="Gesprächsdauer Anzeige",
         compute="_compute_time_display"
     )
 
     last_call_date_display = fields.Char(
-        string="Letzter Anruf",
+        string="Letzter Anruf Anzeige",
         compute="_compute_time_display"
     )
 
     next_call_date_display = fields.Char(
-        string="Nächste Wiedervorlage",
+        string="Nächste Wiedervorlage Anzeige",
         compute="_compute_time_display"
     )
 
