@@ -124,6 +124,54 @@ class CallHistory(models.Model):
         string="Wiedervorlage"
     )
 
+
+    # Anzeigehilfen für die Listenansicht. Die Originalwerte bleiben
+    # sekundengenau gespeichert und werden nur für den Benutzer formatiert.
+    call_start_display = fields.Char(
+        string="Datum",
+        compute="_compute_time_display"
+    )
+
+    duration_display = fields.Char(
+        string="Dauer",
+        compute="_compute_time_display"
+    )
+
+    followup_date_display = fields.Char(
+        string="Wiedervorlage",
+        compute="_compute_time_display"
+    )
+
+    @api.depends('call_start', 'duration', 'followup_date')
+    @api.depends_context('tz')
+    def _compute_time_display(self):
+        """Formatiert Zeitwerte für die kompakte Anrufhistorie."""
+        for rec in self:
+            if rec.call_start:
+                local_call_start = fields.Datetime.context_timestamp(
+                    rec, rec.call_start
+                )
+                rec.call_start_display = local_call_start.strftime(
+                    "%d.%m.%Y %H:%M"
+                )
+            else:
+                rec.call_start_display = False
+
+            total_seconds = max(0, round((rec.duration or 0.0) * 60))
+            minutes, seconds = divmod(total_seconds, 60)
+            rec.duration_display = f"{minutes}:{seconds:02d} min"
+
+            if rec.followup_date:
+                local_followup = fields.Datetime.context_timestamp(
+                    rec, rec.followup_date
+                )
+                rec.followup_date_display = local_followup.strftime(
+                    "%d.%m.%Y %H:%M"
+                )
+            else:
+                rec.followup_date_display = False
+
+
     # ---------------------------------------------------------
     # ANZEIGEFELDER
     # ---------------------------------------------------------
