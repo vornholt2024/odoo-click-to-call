@@ -70,6 +70,7 @@ class CallHistory(models.Model):
     # Dieser Wert gehört bewusst nicht zum Leadstatus des Kontakts.
     result_stage = fields.Selection([
         ('new', 'Neu'),
+        ('not_reached', 'Nicht erreicht'),
         ('no_interest', 'Kein Interesse'),
         ('interested', 'Interessiert'),
         ('very_interested', 'Sehr interessiert'),

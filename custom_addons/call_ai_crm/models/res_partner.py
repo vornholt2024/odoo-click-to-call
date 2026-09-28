@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, timezone
 
 import re
 
@@ -124,6 +124,7 @@ class ResPartner(models.Model):
     # und gegebenenfalls in den aktuellen Kontakt übernommen.
     draft_result = fields.Selection([
         ('new', 'Neu'),
+        ('not_reached', 'Nicht erreicht'),
         ('no_interest', 'Kein Interesse'),
         ('interested', 'Interessiert'),
         ('very_interested', 'Sehr interessiert'),
@@ -137,6 +138,32 @@ class ResPartner(models.Model):
     draft_followup = fields.Datetime(
         string="Wiedervorlage"
     )
+
+    @api.onchange('draft_result')
+    def _onchange_draft_result(self):
+        """Setzt bei 'Nicht erreicht' eine Wiedervorlage für morgen 10 Uhr."""
+
+        if self.draft_result != 'not_reached':
+            return
+
+        # Die Wiedervorlage soll sich nach der Zeitzone des Benutzers richten.
+        now_utc = fields.Datetime.now()
+        now_local = fields.Datetime.context_timestamp(self, now_utc)
+
+        tomorrow_local = now_local + timedelta(days=1)
+        followup_local = tomorrow_local.replace(
+            hour=10,
+            minute=0,
+            second=0,
+            microsecond=0
+        )
+
+        # Odoo speichert Datetime-Werte ohne Zeitzoneninformation in UTC.
+        followup_utc = followup_local.astimezone(
+            timezone.utc
+        ).replace(tzinfo=None)
+
+        self.draft_followup = followup_utc    
 
     # Technisches Ankerfeld für das Voice-Note-Widget im Browser.
     # Die Aufnahme selbst wird in diesem ersten Schritt noch nicht in
@@ -713,7 +740,9 @@ class ResPartner(models.Model):
             'followup_date': self.draft_followup,
         })
 
-        if self.draft_result:
+        # "Nicht erreicht" ist nur das Ergebnis des Anrufversuchs.
+        # Der bisherige Leadstatus bleibt in diesem Fall unverändert.
+        if self.draft_result and self.draft_result != 'not_reached':
             self.lead_status = self.draft_result
 
         # Eine bereits bestehende Wiedervorlage wird nicht gelöscht,
