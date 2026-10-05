@@ -61,6 +61,7 @@ class CallAiCrmAnalysisController(http.Controller):
         """Analysiert ein Transkript und liefert nur definierte CRM-Vorschläge."""
 
         transcript = (post.get("transcript") or "").strip()
+        _logger.info("DEBUG Voice-Note Transkript: %s", transcript)
         if not transcript:
             return self._json_response(
                 {"error": "Es wurde kein Transkript zur Analyse übertragen."},
@@ -157,8 +158,16 @@ class CallAiCrmAnalysisController(http.Controller):
         analysis["lead_status"] = self._classify_lead_status(transcript)
 
         if analysis.get("followup_requested"):
+            _logger.info(
+                "DEBUG Wiedervorlage Ausdruck: %s",
+                analysis.get("followup_expression", ""),
+            )
             followup_datetime = self._parse_followup_expression(
                 analysis.get("followup_expression", "")
+            )
+            _logger.info(
+                "DEBUG Berechneter Wiedervorlagetermin: %s",
+                followup_datetime,
             )
             analysis["followup_datetime"] = followup_datetime
         else:
