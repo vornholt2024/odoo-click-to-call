@@ -29,27 +29,6 @@ WEEKDAYS = {
 ANALYSIS_SCHEMA = {
     "type": "object",
     "properties": {
-        "lead_status": {
-            "type": "string",
-            "enum": [
-                "no_interest",
-                "interested",
-                "very_interested",
-                "customer",
-            ],
-        },
-        "objections": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "enum": [
-                    "Kein Bedarf",
-                    "Internes Programm",
-                    "Andere Partner",
-                    "Kosten / Preis",
-                ],
-            },
-        },
         "followup_requested": {
             "type": "boolean",
         },
@@ -61,8 +40,6 @@ ANALYSIS_SCHEMA = {
         },
     },
     "required": [
-        "lead_status",
-        "objections",
         "followup_requested",
         "followup_expression",
         "note",
@@ -102,13 +79,9 @@ class CallAiCrmAnalysisController(http.Controller):
             "Analysiere die transkribierte Voice-Note eines Mitarbeiters nach "
             "einem B2B-Akquisegespräch. Gib ausschließlich die durch das "
             "JSON-Schema vorgegebenen Werte zurück. "
-            "Leadstatus: no_interest = kein Interesse, interested = Interesse, "
-            "very_interested = deutliches oder konkretes Interesse, customer = "
-            "bereits Kunde bzw. verbindlicher Kundenstatus. 'new' darf niemals "
-            "zurückgegeben werden. "
-            "Erkenne nur diese Einwände: Kein Bedarf, Internes Programm, "
-            "Andere Partner und Kosten / Preis. Mehrere Einwände dürfen "
-            "gleichzeitig vorkommen. "
+            "Leadstatus und Einwände werden anschließend durch feste "
+            "Geschäftsregeln im Anwendungscode bestimmt und gehören nicht "
+            "zur KI-Ausgabe. "
             "Erkenne eine gewünschte Wiedervorlage. Übernimm eine relative "
             "Zeitangabe wie 'nächsten Dienstag' wortgetreu in "
             "followup_expression. Wenn keine Wiedervorlage genannt wird, setze "
