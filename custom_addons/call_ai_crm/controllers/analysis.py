@@ -288,10 +288,10 @@ class CallAiCrmAnalysisController(http.Controller):
             target_minute = int(time_match.group(2) or 0)
         elif "vormittag" in text_value:
             target_hour = 10
-        elif "mittag" in text_value:
-            target_hour = 12
         elif "nachmittag" in text_value:
             target_hour = 15
+        elif "mittag" in text_value:
+            target_hour = 12
 
         local_datetime = user_timezone.localize(
             datetime.combine(
