@@ -176,6 +176,10 @@ class CallAiCrmAnalysisController(http.Controller):
                 status=502,
             )
 
+        # Die Einwände werden nicht von der KI übernommen. Die fachliche
+        # Zuordnung erfolgt anhand fester Regeln im eigenen Code.
+        analysis["objections"] = self._classify_objections(transcript)
+
         if analysis.get("followup_requested"):
             followup_datetime = self._parse_followup_expression(
                 analysis.get("followup_expression", "")
@@ -185,6 +189,46 @@ class CallAiCrmAnalysisController(http.Controller):
             analysis["followup_datetime"] = None
 
         return self._json_response({"analysis": analysis})
+
+    @staticmethod
+    def _classify_objections(transcript):
+        """Ordnet erkannte Aussagen festen Einwand-Kategorien zu."""
+
+        text_value = (transcript or "").lower()
+        objections = []
+
+        if (
+            "kein bedarf" in text_value
+            or "keinen bedarf" in text_value
+            or "brauchen niemanden" in text_value
+            or "kein personalbedarf" in text_value
+        ):
+            objections.append("Kein Bedarf")
+
+        if (
+            "internes programm" in text_value
+            or "eigene lösung" in text_value
+            or "eigene personalabteilung" in text_value
+        ):
+            objections.append("Internes Programm")
+
+        if (
+            "anderer anbieter" in text_value
+            or "anderen anbieter" in text_value
+            or "andere agentur" in text_value
+            or "bestehender dienstleister" in text_value
+        ):
+            objections.append("Andere Partner")
+
+        if (
+            "zu teuer" in text_value
+            or "kosten" in text_value
+            or "preis" in text_value
+            or "budget" in text_value
+        ):
+            objections.append("Kosten / Preis")
+
+        return objections
 
     @staticmethod
     def _parse_followup_expression(expression):
