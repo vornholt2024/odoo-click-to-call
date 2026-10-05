@@ -751,6 +751,15 @@ class ResPartner(models.Model):
         if self.draft_followup:
             self.next_call_date = self.draft_followup
 
+            # Die bestätigte Wiedervorlage wird zusätzlich als normale
+            # Odoo-Aktivität "Anrufen" für den aktuellen Mitarbeiter angelegt.
+            self.activity_schedule(
+                'mail.mail_activity_data_call',
+                date_deadline=self.draft_followup.date(),
+                summary='Wiedervorlage B2B-Akquise',
+                user_id=self.env.user.id,
+            )
+
         self._finish_call_processing()
 
         return True
