@@ -179,9 +179,9 @@ class CallAiCrmAnalysisController(http.Controller):
         # Die Einwände werden nicht von der KI übernommen. Die fachliche
         # Zuordnung erfolgt anhand fester Regeln im eigenen Code.
         analysis["objections"] = self._classify_objections(transcript)
-        lead_status = self._classify_lead_status(transcript)
-        if lead_status:
-            analysis["lead_status"] = lead_status
+        # Der Leadstatus wird ausschließlich durch die festen Regeln bestimmt.
+        # Gibt es keine eindeutige Zuordnung, wird kein Status vorgeschlagen.
+        analysis["lead_status"] = self._classify_lead_status(transcript)
 
         if analysis.get("followup_requested"):
             followup_datetime = self._parse_followup_expression(
