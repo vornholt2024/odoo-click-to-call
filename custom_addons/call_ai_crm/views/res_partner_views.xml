@@ -717,4 +717,22 @@
 
     </record>
 
+
+    <!--
+        Ergänzt die vorhandene Kontaktliste nur um die Wiedervorlage.
+        Der B2B-Akquise-Notebook-Reiter in der Formularansicht bleibt unverändert.
+    -->
+    <record id="view_partner_tree_inherit_call_ai_followup" model="ir.ui.view">
+        <field name="name">res.partner.call.ai.followup.list</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='activity_ids']" position="after">
+                <field name="next_call_date"
+                       string="Nächste Wiedervorlage"
+                       optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
