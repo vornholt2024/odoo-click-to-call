@@ -179,6 +179,9 @@ class CallAiCrmAnalysisController(http.Controller):
         # Die Einwände werden nicht von der KI übernommen. Die fachliche
         # Zuordnung erfolgt anhand fester Regeln im eigenen Code.
         analysis["objections"] = self._classify_objections(transcript)
+        lead_status = self._classify_lead_status(transcript)
+        if lead_status:
+            analysis["lead_status"] = lead_status
 
         if analysis.get("followup_requested"):
             followup_datetime = self._parse_followup_expression(
@@ -189,6 +192,56 @@ class CallAiCrmAnalysisController(http.Controller):
             analysis["followup_datetime"] = None
 
         return self._json_response({"analysis": analysis})
+
+    @staticmethod
+    def _classify_lead_status(transcript):
+        """Ordnet Aussagen einem festen Leadstatus zu."""
+
+        text_value = (transcript or "").lower()
+
+        # Ein bestehender oder verbindlich gewordener Kunde hat Vorrang.
+        if (
+            "ist bereits kunde" in text_value
+            or "bereits kunde" in text_value
+            or "ist schon kunde" in text_value
+            or "auftrag erteilt" in text_value
+        ):
+            return "customer"
+
+        # Ein konkreter Personalbedarf spricht für sehr starkes Interesse.
+        if (
+            "sucht aktuell" in text_value
+            or "suchen aktuell" in text_value
+            or "sucht dringend" in text_value
+            or "suchen dringend" in text_value
+            or "konkreter bedarf" in text_value
+            or "konkreten bedarf" in text_value
+        ):
+            return "very_interested"
+
+        # Klare Ablehnungen werden vor allgemeinen Interesse-Begriffen geprüft.
+        if (
+            "kein interesse" in text_value
+            or "keine interesse" in text_value
+            or "nicht interessiert" in text_value
+            or "nicht mehr anrufen" in text_value
+            or "kommt nicht infrage" in text_value
+            or "kommt nicht in frage" in text_value
+        ):
+            return "no_interest"
+
+        if (
+            "interessiert" in text_value
+            or "interesse" in text_value
+            or "angebot schicken" in text_value
+            or "informationen schicken" in text_value
+            or "weitere informationen" in text_value
+            or "weiteren kontakt" in text_value
+        ):
+            return "interested"
+
+        # Ohne eindeutige Aussage bleibt der bisherige KI-Vorschlag erhalten.
+        return None
 
     @staticmethod
     def _classify_objections(transcript):
