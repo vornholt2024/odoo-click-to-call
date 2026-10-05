@@ -309,15 +309,36 @@ class CallAiCrmAnalysisController(http.Controller):
             r"(?<!\d)([01]?\d|2[0-3])(?:\s*[:.]\s*([0-5]\d))?\s*(?:uhr)?",
             text_value,
         )
+
+        hour_words = {
+            "acht": 8,
+            "neun": 9,
+            "zehn": 10,
+            "elf": 11,
+            "zwölf": 12,
+            "dreizehn": 13,
+            "vierzehn": 14,
+            "fünfzehn": 15,
+            "sechzehn": 16,
+            "siebzehn": 17,
+            "achtzehn": 18,
+        }
+
         if time_match:
             target_hour = int(time_match.group(1))
             target_minute = int(time_match.group(2) or 0)
-        elif "vormittag" in text_value:
-            target_hour = 10
-        elif "nachmittag" in text_value:
-            target_hour = 15
-        elif "mittag" in text_value:
-            target_hour = 12
+        else:
+            for hour_word, hour_value in hour_words.items():
+                if f"{hour_word} uhr" in text_value:
+                    target_hour = hour_value
+                    break
+            else:
+                if "vormittag" in text_value:
+                    target_hour = 10
+                elif "nachmittag" in text_value:
+                    target_hour = 15
+                elif "mittag" in text_value:
+                    target_hour = 12
 
         local_datetime = user_timezone.localize(
             datetime.combine(
