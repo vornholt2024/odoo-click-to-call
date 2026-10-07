@@ -203,6 +203,9 @@ class CallAiCrmAnalysisController(http.Controller):
         ):
             return "no_interest"
 
+        # Ein allgemeiner Personalbedarf reicht für den Status "Interessiert".
+        # Die stärkeren Formulierungen "sucht aktuell" und "sucht dringend"
+        # wurden bereits vorher geprüft und bleiben deshalb "Sehr interessiert".
         if (
             "interessiert" in text_value
             or "interesse" in text_value
@@ -210,6 +213,8 @@ class CallAiCrmAnalysisController(http.Controller):
             or "informationen schicken" in text_value
             or "weitere informationen" in text_value
             or "weiteren kontakt" in text_value
+            or "sucht " in text_value
+            or "suchen " in text_value
         ):
             return "interested"
 
