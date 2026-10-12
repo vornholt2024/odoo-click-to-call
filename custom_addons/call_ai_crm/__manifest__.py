@@ -1,6 +1,6 @@
 {
     'name': 'Call AI CRM',
-    'version': '17.0.1.0',
+    'version': '17.0.1.0.0',
     'summary': 'B2B Click-to-Call und KI-gestützte Gesprächsnachbearbeitung',
 
     'description': """
