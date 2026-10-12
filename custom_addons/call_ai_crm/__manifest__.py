@@ -1,14 +1,16 @@
 {
     'name': 'Call AI CRM',
     'version': '1.0',
-    'summary': 'Telefonie + KI Integration',
+    'summary': 'B2B Click-to-Call und KI-gestützte Gesprächsnachbearbeitung',
 
     'description': """
-        Erweiterung von Odoo CRM um:
-        - Click-to-Call Funktionen
-        - Call Tracking
-        - Call History Speicherung
-        - Vorbereitung für KI-Analyse
+        Erweiterung der Odoo-Kontaktverwaltung zur Unterstützung
+        der B2B-Telefonakquise mit Click-to-Call, Gesprächsprotokollierung,
+        Anrufhistorie, Wiedervorlagenverwaltung und 
+        KI-gestützter Verarbeitung von Voice Notes. 
+        Die fachliche Klassifikation erfolgt regelbasiert; 
+        vorgeschlagene Ergebnisse werden vor der Speicherung durch 
+        den Mitarbeiter geprüft und bestätigt.
     """,
 
     'author': 'Heinz-Jörg Vornholt',
