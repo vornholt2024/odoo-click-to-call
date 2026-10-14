@@ -440,7 +440,7 @@ class ResPartner(models.Model):
         raw_number = self.phone or self.mobile
         phone_number = self._format_phone_number(raw_number)
 
-        return self.env['call.history'].create({
+        return self.env['call.history'].sudo().create({
             'partner_id': self.id,
             'call_start': self.call_start,
             'phone_number': phone_number or raw_number,
@@ -636,7 +636,7 @@ class ResPartner(models.Model):
 
         # Bei einem regulären Gesprächsende sind Start, Ende und Dauer
         # tatsächlich durch die Benutzeraktion bestimmt.
-        history = self.env['call.history'].create({
+        history = self.env['call.history'].sudo().create({
             'partner_id': self.id,
             'call_start': self.call_start,
             'call_end': call_end,
@@ -730,7 +730,7 @@ class ResPartner(models.Model):
                 "wurde nicht gefunden."
             )
 
-        history.write({
+        history.sudo().write({
             'result_stage': self.draft_result,
             'objection_no_need': self.objection_no_need,
             'objection_internal': self.objection_internal,
