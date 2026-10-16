@@ -313,7 +313,7 @@ class ResPartner(models.Model):
         if number.startswith("+49"):
             number = "0049" + number[3:]
 
-        elif number.startswith("0"):
+        elif number.startswith("0") and not number.startswith("00"):
             number = "0049" + number[1:]
 
         if not number.startswith("00"):
